@@ -3,7 +3,7 @@ html, body {
   width: 100%;
 }
 
-.character {
+.circle {
   background-color:darkseagreen;
   position: absolute;
   top: 50%;
@@ -11,4 +11,11 @@ html, body {
   width: 50px;
   height: 50px;
   border-radius: 50%;
+}
+
+canvas {
+  width: 500px;
+  height: 500px;
+  border-radius: 10px;
+  background-color:lightcyan;
 }
