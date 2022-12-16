@@ -19,3 +19,13 @@ canvas {
   border-radius: 10px;
   background-color:lightcyan;
 }
+
+button {
+  border: none;
+  background-color: yellow;
+  color: black;
+  font-family: Soleil,Arial,sans-serif;
+}
+button:hover{
+  background-color: orange;
+}
