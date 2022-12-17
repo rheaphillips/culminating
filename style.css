@@ -1,31 +1,23 @@
 html, body {
   height: 100%;
   width: 100%;
-}
-
-.circle {
-  background-color:darkseagreen;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  overflow:hidden;
 }
 
 canvas {
-  width: 500px;
-  height: 500px;
   border-radius: 10px;
   background-color:lightcyan;
 }
 
 button {
   border: none;
-  background-color: yellow;
-  color: black;
-  font-family: Soleil,Arial,sans-serif;
+  background-color: teal;
+  color: white;
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 50px;
+  padding: 15px 32px;
 }
+
 button:hover{
-  background-color: orange;
+  background-color: lightseagreen;
 }
