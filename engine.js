@@ -8,17 +8,17 @@ window.onload = init;
 window.addEventListener("keydown", move, false);
 
 function init() {
-  
+
   // sets canvas to the display <canvas> element
   canvas = document.getElementById("display");
-  
+
   // checks if browser supports <canvas>
   if (canvas.getContext) {
-    
+
     // sets canvas to a 2D rendering context for the character canvas element
     context = canvas.getContext("2d");
 
-  // if canvas is unsupported by the browser
+    // if canvas is unsupported by the browser
   } else {
     document.getElementById("canvasNotSupported").innerHTML = "Your browser doesn't support canvas! Please use another browser to play game";
   }
@@ -46,7 +46,7 @@ function draw() {
   yVelocity += 150 * secondsPassed
 
   // if player isn't moving character left or right (accelerating), the horizontal velocity of the character reduces back to 0
-  if (accelerating == false) {
+  if (accelerating == false && y == 400) {
     if (xVelocity > 0) {
       xVelocity -= 50 * secondsPassed
     }
@@ -60,37 +60,46 @@ function draw() {
   x += xVelocity * secondsPassed
   y += yVelocity * secondsPassed
 
+  // ensures if square collides with canvas borders, it bounces back
   if (y <= 0) {
     y = 0
-    yVelocity = 75
+    yVelocity = 0
   }
   else if (y >= 400) {
     y = 400
-    yVelocity = -75
+    yVelocity = -yVelocity * .5
   }
   if (x <= 0) {
     x = 0
     xVelocity = 75
   }
-  else if (x >= 900) {
-    x = 900
+  else if (x >= 700) {
+    x = 700
     xVelocity = -75
   }
-  
+
   // clears canvas before loading the next frame
   context.clearRect(0, 0, canvas.width, canvas.height);
 
+  // draws player space to canvas
+  context.fillStyle = "blue";
+  context.fillRect(300 - x, - y + 150, 800, 500);
+
   // draws character to canvas
   context.fillStyle = character_colour;
-  context.fillRect(x, y, 100, 100);
-  
+  context.fillRect(300, 150, 100, 100);
+
+  // draws obstacle to canvas
+  context.fillStyle = character_colour;
+  context.fillRect(-x, -y, 100, 100);
+
 }
 
 // updates x and y velocities of the character depending on which arrow key is pressed
 function move(e) {
 
   // the keyCode of the key that's pressed is compared with the four arrow key cases
-  switch(e.keyCode) {
+  switch (e.keyCode) {
 
     // left key pressed
     case 37:
@@ -107,7 +116,7 @@ function move(e) {
       }
       accelerating = true
       break;
-      
+
     // up key pressed
     case 38:
       yVelocity -= 200;
@@ -117,8 +126,8 @@ function move(e) {
     case 40:
       yVelocity += 200;
       break;
-  }  
-}       
+  }
+}
 
 // change colour of character
 function colourChange() {
