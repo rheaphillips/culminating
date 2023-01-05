@@ -1,14 +1,117 @@
 // <img id="ground" src="ground.png" alt="ground">
 
 // declares variables
-let canvas, context, secondsPassed, oldTimeStamp = 0, xCharacter = 10, yCharacter = 400, xVelocity = 0, yVelocity = 0, xObstacle, yObstacle, widthObstacle, heightObstacle, characterColour = "plum", left = false, right = false, up = false, down = false, colourIndex;
+let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 500, xCharacter = 10, yCharacter = 400, xVelocity = 0, yVelocity = 0, xObstacle, yObstacle, widthObstacle, heightObstacle, characterColour = "plum", left = false, right = false, up = false, colourIndex, platformCoordinates = [], platforms = [], xPlatform = {min: 100, max: 200}, yPlatform = {min: 200, max: 300}, widthPlatform = {min: 100, max: 200}, heightPlatform = {min: 100, max: 200}, platformNum = 0;
 
 // runs initialization function as soon as window loads
 window.onload = init;
 
-// listens for keydown/keyup events and calls move/stop, the event handler functions
-window.addEventListener("keydown", move, false);
-window.addEventListener("keyup", stop, false);
+class Player {
+  constructor() {
+    this.position = {
+      x: 10,
+      y: 400,
+    }
+    this.velocity = {
+      x: 0,
+      y: 0,
+    }
+    this.xSquare = 350;
+  }
+
+  draw() {
+    
+    // clears canvas before loading the next frame
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  
+    // draws player space to canvas
+    context.fillStyle = "lightgreen";
+    context.fillRect(350 - this.position.x, 0, canvas.width, canvas.height);
+  
+    // context.drawImage("ground.png", 0, 0);
+    
+    // draws character to canvas
+    context.fillStyle = characterColour;
+    context.fillRect(this.xSquare, this.position.y, 100, 100);
+  }
+
+  // updates x and y velocities of the character depending on which arrow key is pressed
+  update(secondsPassed) {
+
+    this.draw();
+    
+    // left key pressed and velocity is within it's max limit
+    if (left == true && this.velocity.x >= -200) this.velocity.x -= 20;
+    
+    // right key pressed and velocity is within it's max limit
+    if (right == true && this.velocity.x <= 200) this.velocity.x += 20;
+    
+    // up key pressed
+    if (up == true) this.velocity.y -= 100;
+  
+    // if player isn't moving character left or right (accelerating), the horizontal velocity of the character reduces back to 0
+    if (left == false && right == false && this.position.y == 400) {
+      if (this.velocity.x > 0) {
+        this.velocity.x -= 50 * secondsPassed;
+      }
+      else if (this.velocity.x < 0) {
+        this.velocity.x += 50 * secondsPassed;
+      }
+    }
+  
+    // y velocity constantly impacted by the acceleration due to gravity 
+    this.velocity.y += gravity * secondsPassed;
+
+    // x and y coordinates dependent on the seconds that have passed since the last frame
+
+    // ensures camera only follows the player when its moving forward, beyond the center point of the screen
+    if (this.velocity.x > 0 && this.xSquare >= 350) {
+      this.xSquare = 350
+      this.position.x += this.velocity.x * secondsPassed;
+    }
+    else {
+      this.xSquare += this.velocity.x * secondsPassed;
+    }
+    this.position.y += this.velocity.y * secondsPassed;
+  
+    // ensures if square collides with canvas borders, it bounces back
+    if (this.position.y <= 0) {
+      this.position.y = 0;
+      this.velocity.y = 0;
+    }
+    else if (this.position.y >= 400) {
+      this.position.y = 400;
+      this.velocity.y = -this.velocity.y * .5;
+    }
+    if (this.xSquare <= 0) {
+      this.xSquare = 0;
+      this.velocity.x = 75;
+    }
+  }
+}
+
+class Platform {
+
+  // randomizes coordinates and dimensions, within the given range
+  constructor({x, y, width, height}) {
+    this.position = {
+      x: Math.floor(Math.random() * (x.max - x.min)) + x.min,
+      y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
+    }
+    this.dimension = {
+      x: Math.floor(Math.random() * (width.max - width.min)) + width.min,
+      y: Math.floor(Math.random() * (height.max - height.min)) + height.min,
+    }
+  }
+
+  // draws platform to canvas
+  draw(xPlayer) {
+    context.fillStyle = "yellow";
+    context.fillRect(this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
+  }
+}
+
+const player = new Player();
 
 //initiallizes the HTML canvas
 function init() {
@@ -22,214 +125,94 @@ function init() {
     // sets canvas to a 2D rendering context for the character canvas element
     context = canvas.getContext("2d");
 
+    // start the first frame request
+    window.requestAnimationFrame(gameLoop);
+
     // if canvas is unsupported by the browser
   } else {
     document.getElementById("canvasNotSupported").innerHTML = "Your browser doesn't support canvas! Please use another browser to play game";
   }
-
-  // start the first frame request
-  window.requestAnimationFrame(gameLoop);
-}
-
-class Player {
-  constructor(position) {
-    this.position = position
-    this.velocity = {
-      x: 0,
-      y: 1,
-    }
-  }
-
-  // updates x and y velocities of the character depending on which arrow key is pressed
-  update() {
-    
-  // left key pressed
-  if (left == true && xVelocity >= -200) {
-    xVelocity -= 20;
-  }
-  
-  // right key pressed
-  if (right == true && xVelocity <= 200) {
-    xVelocity += 20;
-  }
-  
-  // up key pressed
-  if (up == true) {
-    yVelocity -= 100;
-  }
-
-  // down key pressed
-  if (down == true) {
-    yVelocity += 100;
-  }
-
-  // if player isn't moving character left or right (accelerating), the horizontal velocity of the character reduces back to 0
-  if (left == false && right == false && yCharacter == 400) {
-    if (xVelocity > 0) {
-      xVelocity -= 50 * secondsPassed
-    }
-    else if (xVelocity < 0) {
-      xVelocity += 50 * secondsPassed
-    }
-  }
-
-  // y velocity constantly impacted by the acceleration due to gravity 
-  yVelocity += 500 * secondsPassed
-  }
 }
 
 function gameLoop(timeStamp) {
-
+  
   // calculates how manu seconds have passed since the last frame request in order to accurately calculate the location of the character using it's constant speed
   secondsPassed = (timeStamp - oldTimeStamp) / 1000;
   oldTimeStamp = timeStamp;
 
-  draw(secondsPassed);
-  obstacle();
+  player.update(secondsPassed); 
+
+  let newPlatform = new Platform({x: {min: xPlatform.min, max: xPlatform.max}, y: {min: yPlatform.min, max: yPlatform.max}, width: {min: widthPlatform.min, max: widthPlatform.max}, height: {min: heightPlatform.min, max: heightPlatform.max}});
+
+  // adds new platform to the list containing all platforms
+  platforms.push(newPlatform)
+
+  // adds platform coordinates to a list containting coordinates for object collision
+  platformCoordinates.push([newPlatform.position.x, newPlatform.position.y, newPlatform.dimension.x, newPlatform.dimension.y])
+
+  // identfies the index of the oldest platform still on screen
+  for (let i = 0; i < platforms.length; i++) { 
+    if (platforms[i].position.x + platforms[i].dimension.x > 0) platformNum = i
+    break
+  }
+
+  // draws all platforms
+  for (let i = platformNum; i < platforms.length; i++) { 
+    platforms[i].draw(player.position.x);
+  }
+
+  xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 200
+  xPlatform.max = xPlatform.min + 100
 
   // keeps requesting new frames by recalling the gameLoop function
   window.requestAnimationFrame(gameLoop);
 }
 
-// draws character
-function draw() {
+// listens for keydown/keyup events and calls move/stop, the event handler functions
+
+window.addEventListener("keydown", (event) => {
   
-  // updates x and y velocities of the character depending on which arrow key is pressed
-
-  // left key pressed
-  if (left == true && xVelocity >= -200) {
-    xVelocity -= 20;
-  }
-  
-  // right key pressed
-  if (right == true && xVelocity <= 200) {
-    xVelocity += 20;
-  }
-  
-  // up key pressed
-  if (up == true) {
-    yVelocity -= 100;
-  }
-
-  // down key pressed
-  if (down == true) {
-    yVelocity += 100;
-  }
-
-  // if player isn't moving character left or right (accelerating), the horizontal velocity of the character reduces back to 0
-  if (left == false && right == false && yCharacter == 400) {
-    if (xVelocity > 0) {
-      xVelocity -= 50 * secondsPassed
-    }
-    else if (xVelocity < 0) {
-      xVelocity += 50 * secondsPassed
-    }
-  }
-
-  // y velocity constantly impacted by the acceleration due to gravity 
-  yVelocity += 500 * secondsPassed
-
-  // x and y coordinates dependent on the seconds that have passed since the last frame
-  xCharacter += xVelocity * secondsPassed
-  yCharacter += yVelocity * secondsPassed
-
-  // ensures if square collides with canvas borders, it bounces back
-  if (yCharacter <= 0) {
-    yCharacter = 0
-    yVelocity = 0
-  }
-  else if (yCharacter >= 400) {
-    yCharacter = 400
-    yVelocity = -yVelocity * .5
-  }
-  if (xCharacter <= 0) {
-    xCharacter = 0
-    xVelocity = 75
-  }
-  else if (xCharacter >= 700) {
-    xCharacter = 700
-    xVelocity = -75
-  }
-
-  // clears canvas before loading the next frame
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  // draws player space to canvas
-  context.fillStyle = "lightgreen";
-  context.fillRect(10 - xCharacter, 400 - yCharacter, canvas.width, canvas.height);
-
-  // context.drawImage("ground.png", 0, 0);
-  
-  // draws character to canvas
-  context.fillStyle = characterColour;
-  context.fillRect(10, 400, 100, 100);
-}
-
-function obstacle() {
-
-  xObstacle = Math.floor(Math.random() * 300) + 400
-  yObstacle = Math.floor(Math.random() * 100) + 300
-  widthObstacle = Math.floor(Math.random() * 400) + 100
-  heightObstacle = Math.floor(Math.random() * 100) + 100
-  
-  // draws obstacle to canvas
-  context.fillStyle = "white";
-  context.fillRect(xObstacle - xCharacter, yObstacle - yCharacter, widthObstacle, heightObstacle); 
-}
-
-function move(e) {
-
   // the keyCode of the key that's pressed is compared with the four arrow key cases
-  switch (e.keyCode) {
+  switch (event.key) {
 
     // left key pressed
-    case 37:
+    case "a":
       left = true;
       break;
 
     // right key pressed
-    case 39:
+    case "d":
       right = true;
       break;
 
     // up key pressed
-    case 38:
+    case "w":
       up = true;
       break;
-
-    // down key pressed
-    case 40:
-      down = true;                                                     
-      break;
   }
-}
+});
 
-function stop(e) {
-
+window.addEventListener("keyup", (event) => {
+  
   // the keyCode of the key that's released is compared with the four arrow key cases
-  switch (e.keyCode) {
+  switch (event.key) {
 
     // left key released
-    case 37:
+    case "a":
       left = false;
       break;
 
     // right key released
-    case 39:
+    case "d":
       right = false;
       break;
 
     // up key released
-    case 38:
+    case "w":
       up = false;
       break;
-
-    // down key released
-    case 40:
-      down = false;                                                     
-      break;
   }
-}     
+});
 
 // change colour of character to either plum or yellowgreen
 function colourChange() {
