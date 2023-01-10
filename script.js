@@ -1,7 +1,7 @@
 // <img id="ground" src="ground.png" alt="ground">
 
 // declares variables
-let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 500, xCharacter = 10, yCharacter = 400, xVelocity = 0, yVelocity = 0, xObstacle, yObstacle, widthObstacle, heightObstacle, characterColour = "plum", left = false, right = false, up = false, colourIndex, platformCoordinates = [], platforms = [], xPlatform = {min: 100, max: 200}, yPlatform = {min: 200, max: 300}, widthPlatform = {min: 100, max: 200}, heightPlatform = {min: 100, max: 200}, platformNum = 0;
+let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 100, xCharacter = 10, yCharacter = 400, xVelocity = 0, yVelocity = 0, xObstacle, yObstacle, widthObstacle, heightObstacle, characterColour = "plum", left = false, right = false, up = false, colourIndex, platformCoordinates = [], platforms = [], xPlatform = { min: 100, max: 200 }, yPlatform = { min: 200, max: 300 }, widthPlatform = { min: 100, max: 200 }, heightPlatform = { min: 100, max: 200 }, newestPlatform = 0, isColliding;
 
 // runs initialization function as soon as window loads
 window.onload = init;
@@ -9,48 +9,84 @@ window.onload = init;
 class Player {
   constructor() {
     this.position = {
-      x: 10,
-      y: 400,
+      x: 0,
+      y: 0,
     }
     this.velocity = {
       x: 0,
       y: 0,
     }
-    this.xSquare = 350;
+    this.width = 100;
+    this.height = 100;
+    this.defaultLocation = 350;
+    this.square = 350;
+    this.isColliding = false;
+    this.isTouching = true;
   }
 
   draw() {
-    
+
     // clears canvas before loading the next frame
     context.clearRect(0, 0, canvas.width, canvas.height);
-  
+
     // draws player space to canvas
     context.fillStyle = "lightgreen";
-    context.fillRect(350 - this.position.x, 0, canvas.width, canvas.height);
-  
+    context.fillRect(this.defaultLocation - this.position.x, 0, canvas.width, canvas.height);
+
     // context.drawImage("ground.png", 0, 0);
-    
+
     // draws character to canvas
     context.fillStyle = characterColour;
-    context.fillRect(this.xSquare, this.position.y, 100, 100);
+    context.fillRect(this.square, this.position.y, this.width, this.height);
   }
 
-  // updates x and y velocities of the character depending on which arrow key is pressed
-  update(secondsPassed) {
+  // detects collisions with platforms
+  collisionDetection(platforms) {
+    console.log("it ran")
 
-    this.draw();
-    
-    // left key pressed and velocity is within it's max limit
+    this.isColliding = false;
+    this.isTouching = false;
+
+    for (let i = 0; i < platforms.length; i++) {
+      const platform = platforms[i];
+
+      // if the coordinates of the square don't overlap with the platform, the variable indicating collision is set to false
+      if (this.position.y + this.height > platform.position.y && this.position.x + 350 < platform.position.x + platform.dimension.x && this.position.x + 350 + this.width > platform.position.x && this.position.y < platform.position.y + platform.dimension.y) {
+        this.isColliding = true;
+        this.isTouching = true;
+        console.log("bad")
+      }      // restricts movement if collision is detected
+      /* if (this.isColliding) {
+        if (this.velocity.y > 0) {
+          this.velocity.y = 0
+          this.position.y = platform.position.y - this.height + 0.01
+          this.isTouching = true;
+        } else if (this.velocity.y < 0) {
+          this.velocity.y = 0
+          this.position.y = platform.position.y + platform.dimension.y + 0.01
+        } else if (this.velocity.x > 0) {
+          this.velocity.x = 0
+          this.position.x = platform.position.x - this.width - this.defaultLocation + 0.01
+        } else if (this.velocity.x < 0) {
+          this.velocity.x = 0
+          this.square = platform.position.x + platform.dimension.x + 0.01
+        }
+      } */
+    }
+    console.log(this.isTouching)
+  }
+
+  // updates horizontal velocity of the character
+  horizontalMovement(secondsPassed) {
+
+    // horizontal velocity decreases by 20 pixels if "a" is pressed and velocity is within it's max limit
     if (left == true && this.velocity.x >= -200) this.velocity.x -= 20;
-    
-    // right key pressed and velocity is within it's max limit
+
+    // horizontal velocity increases by 20 pixels if "d" is pressed and velocity is within it's max limit
     if (right == true && this.velocity.x <= 200) this.velocity.x += 20;
-    
-    // up key pressed
-    if (up == true) this.velocity.y -= 100;
-  
-    // if player isn't moving character left or right (accelerating), the horizontal velocity of the character reduces back to 0
-    if (left == false && right == false && this.position.y == 400) {
+
+    // if player isn't pressing either "a" or "d" (and so the square isn't accelerating), and the square is on the ground, the horizontal velocity of the character slowly reduces back to 0 at a rate of 50 pixels/second (imitating friction)
+    if (left == false && right == false && this.isTouching == true) {
       if (this.velocity.x > 0) {
         this.velocity.x -= 50 * secondsPassed;
       }
@@ -58,42 +94,64 @@ class Player {
         this.velocity.x += 50 * secondsPassed;
       }
     }
-  
-    // y velocity constantly impacted by the acceleration due to gravity 
-    this.velocity.y += gravity * secondsPassed;
 
-    // x and y coordinates dependent on the seconds that have passed since the last frame
+    // horizontal position updated using new velocity and the number of seconds that have passed since the last frame
 
     // ensures camera only follows the player when its moving forward, beyond the center point of the screen
-    if (this.velocity.x > 0 && this.xSquare >= 350) {
-      this.xSquare = 350
+    if (this.velocity.x > 0 && this.square >= this.defaultLocation) { // if square is at the center of the screen, camera position (this.position.x) changes
+      this.square = this.defaultLocation
       this.position.x += this.velocity.x * secondsPassed;
     }
-    else {
-      this.xSquare += this.velocity.x * secondsPassed;
+    else { // otherwise the actual position of the square (this.square) changes
+      this.square += this.velocity.x * secondsPassed;
     }
+
+    this.collisionDetection(platforms);
+    if (this.isColliding) {
+      if (this.square == 350) {
+        this.position.x -= this.velocity.x * secondsPassed;
+        this.velocity.x = 0;
+      } else {
+        this.square -= this.velocity.x * secondsPassed;
+        this.velocity.x = 0;
+      }
+    }
+  }
+
+  // updates vertical velocity of the character
+  verticalMovement(secondsPassed) {
+
+    // vertical velocity constantly impacted by acceleration due to gravity 
+    this.velocity.y += gravity * secondsPassed;
+
+    // vertical velocity increases when "w" is pressed
+    if (up == true && this.isTouching == true) {
+      this.velocity.y = -100;
+      this.position.y -= 50;
+    }
+    // vertical position updated using new velocity and the number of seconds that have passed since the last frame
     this.position.y += this.velocity.y * secondsPassed;
-  
-    // ensures if square collides with canvas borders, it bounces back
-    if (this.position.y <= 0) {
-      this.position.y = 0;
+
+    this.collisionDetection(platforms);
+    if (this.isColliding) {
+      this.position.y -= this.velocity.y * secondsPassed;
       this.velocity.y = 0;
     }
-    else if (this.position.y >= 400) {
-      this.position.y = 400;
-      this.velocity.y = -this.velocity.y * .5;
-    }
-    if (this.xSquare <= 0) {
-      this.xSquare = 0;
-      this.velocity.x = 75;
-    }
+  }
+
+  update(secondsPassed) {
+
+    this.draw();
+    this.horizontalMovement(secondsPassed);
+    this.verticalMovement(secondsPassed);
+
   }
 }
 
 class Platform {
 
   // randomizes coordinates and dimensions, within the given range
-  constructor({x, y, width, height}) {
+  constructor({ x, y, width, height }) {
     this.position = {
       x: Math.floor(Math.random() * (x.max - x.min)) + x.min,
       y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
@@ -112,6 +170,11 @@ class Platform {
 }
 
 const player = new Player();
+let newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
+platforms.push(newPlatform);
+player.position.x = newPlatform.position.x - 350
+player.position.y = newPlatform.position.y - player.height
+
 
 //initiallizes the HTML canvas
 function init() {
@@ -135,34 +198,35 @@ function init() {
 }
 
 function gameLoop(timeStamp) {
-  
+
   // calculates how manu seconds have passed since the last frame request in order to accurately calculate the location of the character using it's constant speed
   secondsPassed = (timeStamp - oldTimeStamp) / 1000;
   oldTimeStamp = timeStamp;
 
-  player.update(secondsPassed); 
+  player.update(secondsPassed);
 
-  let newPlatform = new Platform({x: {min: xPlatform.min, max: xPlatform.max}, y: {min: yPlatform.min, max: yPlatform.max}, width: {min: widthPlatform.min, max: widthPlatform.max}, height: {min: heightPlatform.min, max: heightPlatform.max}});
+  // creates the next platform object after the furthest one visible on screen is 100 pixels away from the right edge
+  if (newPlatform.position.x + newPlatform.dimension.x + 100 <= player.position.x + 800) {
 
-  // adds new platform to the list containing all platforms
-  platforms.push(newPlatform)
+    // the randomized x-coordinate of the new platform is within 100 pixels from 
+    xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 100;
+    xPlatform.max = xPlatform.min + 100;
 
-  // adds platform coordinates to a list containting coordinates for object collision
-  platformCoordinates.push([newPlatform.position.x, newPlatform.position.y, newPlatform.dimension.x, newPlatform.dimension.y])
+    newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
 
-  // identfies the index of the oldest platform still on screen
-  for (let i = 0; i < platforms.length; i++) { 
-    if (platforms[i].position.x + platforms[i].dimension.x > 0) platformNum = i
-    break
+    // adds the platform to the list containing all platform objects
+    platforms.push(newPlatform);
   }
 
-  // draws all platforms
-  for (let i = platformNum; i < platforms.length; i++) { 
+  // removes oldest platform and their coordinates from their respective arrays if it's no longer visible on screen 
+  if (platforms[0].position.x + platforms[0].dimension.x - player.position.x < 0) {
+    platforms.splice(0, 1);
+  }
+
+  // draws all platforms visible on screen 
+  for (let i = 0; i < platforms.length; i++) {
     platforms[i].draw(player.position.x);
   }
-
-  xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 200
-  xPlatform.max = xPlatform.min + 100
 
   // keeps requesting new frames by recalling the gameLoop function
   window.requestAnimationFrame(gameLoop);
@@ -171,7 +235,7 @@ function gameLoop(timeStamp) {
 // listens for keydown/keyup events and calls move/stop, the event handler functions
 
 window.addEventListener("keydown", (event) => {
-  
+
   // the keyCode of the key that's pressed is compared with the four arrow key cases
   switch (event.key) {
 
@@ -193,7 +257,7 @@ window.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("keyup", (event) => {
-  
+
   // the keyCode of the key that's released is compared with the four arrow key cases
   switch (event.key) {
 
@@ -214,16 +278,6 @@ window.addEventListener("keyup", (event) => {
   }
 });
 
-// change colour of character to either plum or yellowgreen
-function colourChange() {
-  if (characterColour == "plum") {
-    characterColour = "yellowgreen"
-  }
-  else {
-    characterColour = "plum"
-  }
-}
-
 // randomly assigns a colour to the character
 function colourRandom() {
 
@@ -234,4 +288,4 @@ function colourRandom() {
 
   // picks a random colour from the colour list using the randomized index
   characterColour = "rgb(" + red + ", " + green + ", " + blue + ")"
-}
+};
