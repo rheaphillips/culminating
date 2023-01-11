@@ -42,38 +42,17 @@ class Player {
 
   // detects collisions with platforms
   collisionDetection(platforms) {
-    console.log("it ran")
 
     this.isColliding = false;
-    this.isTouching = false;
-
     for (let i = 0; i < platforms.length; i++) {
       const platform = platforms[i];
 
       // if the coordinates of the square don't overlap with the platform, the variable indicating collision is set to false
-      if (this.position.y + this.height > platform.position.y && this.position.x + 350 < platform.position.x + platform.dimension.x && this.position.x + 350 + this.width > platform.position.x && this.position.y < platform.position.y + platform.dimension.y) {
+      if (this.position.y + this.height > platform.position.y && this.position.x + this.square < platform.position.x + platform.dimension.x && this.position.x + this.square + this.width > platform.position.x && this.position.y < platform.position.y + platform.dimension.y) {
+        this.velocity.x *= .95
         this.isColliding = true;
-        this.isTouching = true;
-        console.log("bad")
-      }      // restricts movement if collision is detected
-      /* if (this.isColliding) {
-        if (this.velocity.y > 0) {
-          this.velocity.y = 0
-          this.position.y = platform.position.y - this.height + 0.01
-          this.isTouching = true;
-        } else if (this.velocity.y < 0) {
-          this.velocity.y = 0
-          this.position.y = platform.position.y + platform.dimension.y + 0.01
-        } else if (this.velocity.x > 0) {
-          this.velocity.x = 0
-          this.position.x = platform.position.x - this.width - this.defaultLocation + 0.01
-        } else if (this.velocity.x < 0) {
-          this.velocity.x = 0
-          this.square = platform.position.x + platform.dimension.x + 0.01
-        }
-      } */
+      }
     }
-    console.log(this.isTouching)
   }
 
   // updates horizontal velocity of the character
@@ -84,16 +63,6 @@ class Player {
 
     // horizontal velocity increases by 20 pixels if "d" is pressed and velocity is within it's max limit
     if (right == true && this.velocity.x <= 200) this.velocity.x += 20;
-
-    // if player isn't pressing either "a" or "d" (and so the square isn't accelerating), and the square is on the ground, the horizontal velocity of the character slowly reduces back to 0 at a rate of 50 pixels/second (imitating friction)
-    if (left == false && right == false && this.isTouching == true) {
-      if (this.velocity.x > 0) {
-        this.velocity.x -= 50 * secondsPassed;
-      }
-      else if (this.velocity.x < 0) {
-        this.velocity.x += 50 * secondsPassed;
-      }
-    }
 
     // horizontal position updated using new velocity and the number of seconds that have passed since the last frame
 
@@ -108,12 +77,15 @@ class Player {
 
     this.collisionDetection(platforms);
     if (this.isColliding) {
-      if (this.square == 350) {
-        this.position.x -= this.velocity.x * secondsPassed;
-        this.velocity.x = 0;
+      if (this.square == this.defaultLocation) {
+        this.position.x -= (Math.abs(this.velocity.x) / this.velocity.x) * Math.max(Math.abs(this.velocity.x) * secondsPassed, .5);
+        this.velocity.x *= -.3;
       } else {
-        this.square -= this.velocity.x * secondsPassed;
-        this.velocity.x = 0;
+        this.square -= (Math.abs(this.velocity.x) / this.velocity.x) * Math.max(Math.abs(this.velocity.x) * secondsPassed, .5);
+        this.velocity.x *= -.3;
+      }
+      if (up == true) {
+        this.velocity.x = (Math.abs(this.velocity.x) / this.velocity.x) * 100 * secondsPassed
       }
     }
   }
@@ -124,11 +96,6 @@ class Player {
     // vertical velocity constantly impacted by acceleration due to gravity 
     this.velocity.y += gravity * secondsPassed;
 
-    // vertical velocity increases when "w" is pressed
-    if (up == true && this.isTouching == true) {
-      this.velocity.y = -100;
-      this.position.y -= 50;
-    }
     // vertical position updated using new velocity and the number of seconds that have passed since the last frame
     this.position.y += this.velocity.y * secondsPassed;
 
@@ -136,6 +103,11 @@ class Player {
     if (this.isColliding) {
       this.position.y -= this.velocity.y * secondsPassed;
       this.velocity.y = 0;
+
+      // vertical velocity increases when "w" is pressed
+      if (up == true) {
+        this.velocity.y = -100;
+      }
     }
   }
 
