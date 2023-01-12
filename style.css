@@ -11,9 +11,13 @@ canvas {
   left: 20%;
 }
 
+button, #highScore {
+  display: inline-block;
+}
+
 button {
   border: none;
-  background-color: teal;
+  background-color: plum;
   color: white;
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 50px;
@@ -21,9 +25,26 @@ button {
   position: relative;
   left: 20%;
   top: 530px;
-  
+}
+
+#highScore {
+  color: white;
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 30px;
+  position: absolute;
+  left: 22%;
+  top: 420px;
+}
+
+#controls {
+  color: white;
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 20px;
+  position: absolute;
+  left: 22%;
+  top: 10px;
 }
 
 button:hover{
-  background-color: lightseagreen;
+  background-color: lightpink;
 }

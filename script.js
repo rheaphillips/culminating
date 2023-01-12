@@ -1,11 +1,16 @@
 // <img id="ground" src="ground.png" alt="ground">
 
 // declares variables
-let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 100, xCharacter = 10, yCharacter = 400, xVelocity = 0, yVelocity = 0, xObstacle, yObstacle, widthObstacle, heightObstacle, characterColour = "plum", left = false, right = false, up = false, colourIndex, platformCoordinates = [], platforms = [], xPlatform = { min: 100, max: 200 }, yPlatform = { min: 200, max: 300 }, widthPlatform = { min: 100, max: 200 }, heightPlatform = { min: 100, max: 200 }, newestPlatform = 0, isColliding;
+let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 1000, characterColour = "plum", left = false, right = false, up = false, colourIndex, newPlatform, platforms, xPlatform, yPlatform, widthPlatform, heightPlatform, highScore, platformNum;
+
+// images
+let sky = new Image();
+sky.src = 'sky.png'
 
 // runs initialization function as soon as window loads
 window.onload = init;
 
+// class contains all the functions needed to create a player object, and draw and move it around the screen
 class Player {
   constructor() {
     this.position = {
@@ -21,19 +26,16 @@ class Player {
     this.defaultLocation = 350;
     this.square = 350;
     this.isColliding = false;
-    this.isTouching = true;
   }
 
+  // drawing square player onto canvas at the correct coordinates
   draw() {
 
     // clears canvas before loading the next frame
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // draws player space to canvas
-    context.fillStyle = "lightgreen";
-    context.fillRect(this.defaultLocation - this.position.x, 0, canvas.width, canvas.height);
-
-    // context.drawImage("ground.png", 0, 0);
+    // draw sky image onto canvas
+    context.drawImage(sky, 0, 0, 800, 533 + 1/3);
 
     // draws character to canvas
     context.fillStyle = characterColour;
@@ -44,25 +46,27 @@ class Player {
   collisionDetection(platforms) {
 
     this.isColliding = false;
+
+    // runs through all the platform objects checking whether the player is within the coordinates of that platform
     for (let i = 0; i < platforms.length; i++) {
       const platform = platforms[i];
 
-      // if the coordinates of the square don't overlap with the platform, the variable indicating collision is set to false
+      // if the coordinates of the square overlap with the platform, the variable indicating collision is set to true
       if (this.position.y + this.height > platform.position.y && this.position.x + this.square < platform.position.x + platform.dimension.x && this.position.x + this.square + this.width > platform.position.x && this.position.y < platform.position.y + platform.dimension.y) {
-        this.velocity.x *= .95
+
         this.isColliding = true;
+        
+        // velocity is reduced by 10% every frame when the square is colliding with a platform, imitating friction 
+        this.velocity.x *= .90;
+
+        platformNum = i + 1;
+        
       }
     }
   }
 
-  // updates horizontal velocity of the character
+  // updates horizontal velocity of the character and adjusts player motion if the new velocity causes collision
   horizontalMovement(secondsPassed) {
-
-    // horizontal velocity decreases by 20 pixels if "a" is pressed and velocity is within it's max limit
-    if (left == true && this.velocity.x >= -200) this.velocity.x -= 20;
-
-    // horizontal velocity increases by 20 pixels if "d" is pressed and velocity is within it's max limit
-    if (right == true && this.velocity.x <= 200) this.velocity.x += 20;
 
     // horizontal position updated using new velocity and the number of seconds that have passed since the last frame
 
@@ -74,23 +78,35 @@ class Player {
     else { // otherwise the actual position of the square (this.square) changes
       this.square += this.velocity.x * secondsPassed;
     }
-
+    
+    // checks if the square is colliding with any of the platform (left and right of the platform since only horizontal velocity has changed)
     this.collisionDetection(platforms);
+    
     if (this.isColliding) {
+      
+      // resets the position of the square to where it was before collision
       if (this.square == this.defaultLocation) {
+        
+        // Math.max is used so that if the amount the square is being reset by is below 9.5, it would reset it by 0.5 pixels instead. this ensures the square isn't stuck motionless due to being adjacent to the wall of the platform
         this.position.x -= (Math.abs(this.velocity.x) / this.velocity.x) * Math.max(Math.abs(this.velocity.x) * secondsPassed, .5);
         this.velocity.x *= -.3;
       } else {
         this.square -= (Math.abs(this.velocity.x) / this.velocity.x) * Math.max(Math.abs(this.velocity.x) * secondsPassed, .5);
         this.velocity.x *= -.3;
+      }  
+
+      // allows player to jump off of the side of walls by allowing player to move diagonally when pressing "w" and touching the platform walls
+      if (up == true && this.velocity.x > 0) {
+        this.velocity.x += 100
+        this.velocity.y -= 500
+      } else if (up == true && this.velocity.x < 0) {
+        this.velocity.x -= 100
+        this.velocity.y -= 500
       }
-      if (up == true) {
-        this.velocity.x = (Math.abs(this.velocity.x) / this.velocity.x) * 100 * secondsPassed
-      }
-    }
+    }  
   }
 
-  // updates vertical velocity of the character
+  // updates vertical velocity of the character and adjusts player motion if the new velocity causes collision
   verticalMovement(secondsPassed) {
 
     // vertical velocity constantly impacted by acceleration due to gravity 
@@ -99,27 +115,42 @@ class Player {
     // vertical position updated using new velocity and the number of seconds that have passed since the last frame
     this.position.y += this.velocity.y * secondsPassed;
 
+    // checks if the square is colliding with any of the platform (top and bottom of the platform since only vertical velocity has changed)
     this.collisionDetection(platforms);
+    
     if (this.isColliding) {
+
+      // updates highscore if on a platform
+      if (highScore < platformNum) {
+        highScore = platformNum 
+      }
+      
+      // resets the position of the square to where it was before collision
       this.position.y -= this.velocity.y * secondsPassed;
       this.velocity.y = 0;
 
+      // horizontal velocity decreases by 20 pixels if "a" is pressed while colliding with a block
+      if (left == true) this.velocity.x -= 50;
+  
+      // horizontal velocity increases by 20 pixels if "d" is pressed while colliding with a block
+      if (right == true) this.velocity.x += 50;
+
       // vertical velocity increases when "w" is pressed
       if (up == true) {
-        this.velocity.y = -100;
+        this.velocity.y -= 500;
       }
     }
   }
 
+  // runs all the nessecary functions for the player
   update(secondsPassed) {
-
     this.draw();
     this.horizontalMovement(secondsPassed);
     this.verticalMovement(secondsPassed);
-
   }
 }
 
+// class contains all the functions needed to create a platform object, and draw and move it depending on camera position
 class Platform {
 
   // randomizes coordinates and dimensions, within the given range
@@ -134,21 +165,17 @@ class Platform {
     }
   }
 
-  // draws platform to canvas
+  // draws platform to canvas using the randomized coordinates and dimensions
   draw(xPlayer) {
-    context.fillStyle = "yellow";
+    context.fillStyle = "lightgoldenrodyellow";
     context.fillRect(this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
   }
 }
 
-const player = new Player();
-let newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
-platforms.push(newPlatform);
-player.position.x = newPlatform.position.x - 350
-player.position.y = newPlatform.position.y - player.height
+// create player object
+let player = new Player();
 
-
-//initiallizes the HTML canvas
+// initiallizes the HTML canvas
 function init() {
 
   // sets canvas to the display <canvas> element
@@ -160,13 +187,40 @@ function init() {
     // sets canvas to a 2D rendering context for the character canvas element
     context = canvas.getContext("2d");
 
-    // start the first frame request
-    window.requestAnimationFrame(gameLoop);
+    initGame();
 
     // if canvas is unsupported by the browser
   } else {
     document.getElementById("canvasNotSupported").innerHTML = "Your browser doesn't support canvas! Please use another browser to play game";
   }
+}
+
+function initGame() {
+
+  // ranges for the coordinates and dimensions of the first platform 
+  xPlatform = { min: 100, max: 200 }, yPlatform = { min: 200, max: 300 }, widthPlatform = { min: 100, max: 200 }, heightPlatform = { min: 100, max: 200 };
+  
+  // first platform object
+  newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
+
+  // set highscore and colliding platform number counter to 0
+  highScore = 0
+  platformNum = 0
+  
+  // add object to a list that will contain all platforms
+  platforms = [];
+  platforms.push(newPlatform);
+  
+  // sets coordinate of the player object to be right on top of the first platform, center the square and velocities to 0
+  player.position.x = newPlatform.position.x - 350;
+  player.position.y = newPlatform.position.y - player.height;
+  player.velocity.x = 0;
+  player.velocity.y = 0;
+  player.square = 350;
+
+  // start the first frame request
+  window.requestAnimationFrame(gameLoop);
+  
 }
 
 function gameLoop(timeStamp) {
@@ -181,7 +235,7 @@ function gameLoop(timeStamp) {
   if (newPlatform.position.x + newPlatform.dimension.x + 100 <= player.position.x + 800) {
 
     // the randomized x-coordinate of the new platform is within 100 pixels from 
-    xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 100;
+    xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 200;
     xPlatform.max = xPlatform.min + 100;
 
     newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
@@ -190,18 +244,18 @@ function gameLoop(timeStamp) {
     platforms.push(newPlatform);
   }
 
-  // removes oldest platform and their coordinates from their respective arrays if it's no longer visible on screen 
-  if (platforms[0].position.x + platforms[0].dimension.x - player.position.x < 0) {
-    platforms.splice(0, 1);
-  }
-
   // draws all platforms visible on screen 
   for (let i = 0; i < platforms.length; i++) {
     platforms[i].draw(player.position.x);
   }
 
-  // keeps requesting new frames by recalling the gameLoop function
-  window.requestAnimationFrame(gameLoop);
+  document.getElementById("highScore").innerHTML = "highscore: " + highScore.toString();
+
+  if (player.position.y > 500) { // if the player falls into the void the game restarts
+    initGame()
+  } else { // otherwise new frames countinue being requested by recalling the gameLoop function
+    window.requestAnimationFrame(gameLoop); 
+  }
 }
 
 // listens for keydown/keyup events and calls move/stop, the event handler functions
