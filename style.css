@@ -11,7 +11,7 @@ canvas {
   left: 20%;
 }
 
-button, #highScore {
+button, #score {
   display: inline-block;
 }
 
@@ -27,7 +27,7 @@ button {
   top: 530px;
 }
 
-#highScore {
+#score {
   color: white;
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 30px;
