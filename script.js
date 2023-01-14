@@ -1,10 +1,15 @@
  // <img id="ground" src="ground.png" alt="ground">
 
 // declares variableshttps://culminating.rheaphillips.repl.co
-let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 1000, characterColour = "plum", left = false, right = false, up = false, colourIndex, newPlatform, platforms, xPlatform, yPlatform, widthPlatform, heightPlatform, score, platformNum, points, xPoint, yPoint, pointIndex = 0, platformColours = ["lightgoldenrodyellow", "gold", "darkslateblue"], buttonColours = ["plum", "deepskyblue", "mediumpurple"], textColours = ["white", "black", "black"], backgroundIndex = 0;
+let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 1000, characterColour = "plum", left = false, right = false, up = false, colourIndex, newPlatform, platforms, xPlatform, yPlatform, widthPlatform, heightPlatform, score, platformNum, coins, xCoin, yCoin, coinIndex = 0, coinsCollected = 0, buttonColours = ["plum", "deepskyblue", "mediumpurple"], textColours = ["white", "black", "black"], themeIndex = 0;
 
-// images
-let imageSources = ["cow right.png", "cow left.png", "cow right 2.png", "cow left 2.png", "sky1.png", "sky2.png", "sky3.png"], imageObjects = [], imageDimensions = [[800, 533], [960, 540], [960, 540]];
+// cow and background sky images
+let imageSources = ["cow right.png", "cow left.png", "sky1.png", "sky2.png", "sky3.png", "brickblock.png", "brickblock.png", "grassblock.png", "mudblock.png", "stoneblock.png", "stoneblock.png"], imageObjects = [], skyDimensions = [[800, 533], [960, 540], [960, 540]];
+
+// coin sprites
+for (let i = 1; i <= 9; i++) {
+  imageSources.push("coins/coin" + (i).toString() + ".png");
+}
 
 for (let i = 0; i < imageSources.length; i++) {
   let newImage = new Image();
@@ -29,6 +34,7 @@ class Player {
     this.width = 98;
     this.height = 59;
     this.defaultLocation = 350;
+    this.prevPosition = 350;
     this.cow = 350;
     this.isColliding = false;
     this.cowImage = imageObjects[0];
@@ -41,8 +47,9 @@ class Player {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw sky image onto canvas
-    context.drawImage(imageObjects[backgroundIndex + 4], 0, 0, imageDimensions[backgroundIndex][0], imageDimensions[backgroundIndex][1]);
+    context.drawImage(imageObjects[themeIndex + 2], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
 
+    
     // draws different cow sprite depending on the direction the cow is moving
     if (this.velocity.x >= 0) {
       this.cowImage = imageObjects[0];
@@ -50,16 +57,13 @@ class Player {
       this.cowImage = imageObjects[1];
     }
 
-    // draws character to canvas
-    // context.fillStyle = characterColour;
-    // context.fillRect(this.cow, this.position.y, this.width, this.height);
-    
+    // draws cow to canvas
     context.drawImage(this.cowImage, this.cow, this.position.y, this.width, this.height);
     
   }
 
   // detects collisions with platforms
-  collisionDetection(platforms) {
+  platformCollisionDetection(platforms) {
 
     this.isColliding = false;
 
@@ -76,6 +80,23 @@ class Player {
         this.velocity.x *= .90;
 
         platformNum = i + 1;
+
+      }
+    }
+  }
+
+  // detects collisions with coins
+  coinCollisionDetection(coins) {
+
+    // runs through all the platform objects checking whether the player is within the coordinates of that platform
+    for (let i = 0; i < coins.length; i++) {
+      const coin = coins[i];
+
+      // if the coordinates of the square overlap with the coin, the coin object is removed from the list of coins
+      if (coin.position.y + coin.dimension.y > this.position.y && coin.position.x < this.position.x + this.cow + this.width && coin.position.x + coin.dimension.x > this.position.x + this.cow && coin.position.y < this.position.y + this.height) {
+        coins.splice(i);
+
+        coinsCollected += 1;
 
       }
     }
@@ -100,7 +121,7 @@ class Player {
     }
 
     // checks if the square is colliding with any of the platform (left and right of the platform since only horizontal velocity has changed)
-    this.collisionDetection(platforms);
+    this.platformCollisionDetection(platforms);
 
     if (this.isColliding) {
 
@@ -136,7 +157,7 @@ class Player {
     this.position.y += this.velocity.y * secondsPassed;
 
     // checks if the square is colliding with any of the platform (top and bottom of the platform since only vertical velocity has changed)
-    this.collisionDetection(platforms);
+    this.platformCollisionDetection(platforms);
 
     if (this.isColliding) {
 
@@ -167,6 +188,7 @@ class Player {
     this.draw();
     this.horizontalMovement(secondsPassed);
     this.verticalMovement(secondsPassed);
+    this.coinCollisionDetection(coins);
   }
 }
 
@@ -179,22 +201,50 @@ class Platform {
       x: Math.floor(Math.random() * (x.max - x.min)) + x.min,
       y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
     }
-    this.dimension = {
-      x: Math.floor(Math.random() * (width.max - width.min)) + width.min,
-      y: Math.floor(Math.random() * (height.max - height.min)) + height.min,
+    this.imageDimension = {
+      x: 50,
+      y: 50,
     }
-    this.colour = platformColours[backgroundIndex];
+    this.dimension = {
+      x: Math.round((Math.floor(Math.random() * (width.max - width.min)) + width.min)/50)*50,
+      y: Math.round((Math.floor(Math.random() * (height.max - height.min)) + width.min)/50)*50,
+    }
+    this.topImage = imageObjects[themeIndex*2 + 5];
+    this.insideImage = imageObjects[themeIndex*2 + 6];
   }
 
   // draws platform to canvas using the randomized coordinates and dimensions
   draw(xPlayer) {
-    context.fillStyle = this.colour;
-    context.fillRect(this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
+
+    // draws platform like an array using 50 x 50 pixels blocks
+    for (let row = 0; row < this.dimension.y; row += 50) {
+      for (let column = 0; column < this.dimension.x; column += 50) {
+
+         // draws just the top row of platform which might be a different type of platform block
+        if (row == 0) {
+          context.drawImage(this.topImage, this.position.x + column - xPlayer, this.position.y, this.imageDimension.x, this.imageDimension.y);
+
+        // draws the rest of the rows of the platform
+        } else {
+          context.drawImage(this.insideImage, this.position.x + column - xPlayer, this.position.y + row, this.imageDimension.x, this.imageDimension.y);
+        }
+        
+      }
+    }
+    
   }
+
+  update(xPlayer) {
+    this.topImage = imageObjects[themeIndex*2 + 5];
+    this.insideImage = imageObjects[themeIndex*2 + 6];
+
+    this.draw(xPlayer);
+  }
+  
 }
 
-// class contains all the functions needed to create a point object, and draw and move it depending on camera position
-class Point {
+// class contains all the functions needed to create a coin object, and draw and move it depending on camera position
+class Coin {
 
   // randomizes coordinates and dimensions, within the given range
   constructor({ x, y }) {
@@ -203,15 +253,34 @@ class Point {
       y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
     }
     this.dimension = {
-      x: 10,
-      y: 10,
+      x: 28,
+      y: 28,
     }
+    this.image = 11;
+    this.timeStamp = 0;
   }
 
-  // draws point object to canvas using the randomized coordinates
+  // draws coin object to canvas using the randomized coordinates
   draw(xPlayer) {
-    context.fillStyle = "white";
-    context.fillRect(this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
+
+    context.drawImage(imageObjects[this.image], this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
+  }
+
+  update(secondsPassed, xPlayer) {
+
+    this.timeStamp += secondsPassed;
+
+    // changes coin sprite every 1 seconds
+    if (this.timeStamp >= 1) {
+      if (this.image == 19) {
+        this.image = 11;
+      } else {
+        this.image += 1;
+      }
+    }
+
+    this.draw(xPlayer);
+    
   }
 }
 
@@ -246,24 +315,16 @@ function initGame() {
   // first platform object
   newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
 
-  // ranges for the coordinates of the first point 
-  xPoint = { min: newPlatform.position.x, max: newPlatform.position.x + newPlatform.dimension.x }, yPoint = { min: newPlatform.position.y - 100, max: newPlatform.position.y };
-
-  // first point object
-  newPoint = new Point({ x: { min: xPoint.min, max: xPoint.max }, y: { min: yPoint.min, max: yPoint.max } });
-
   // set score and colliding platform number counter to 0
   score = 0;
   platformNum = 0;
 
-  // add objects to corresponding lists that contain all platforms/point objects
-  platforms = [];
-  points = [];
-  platforms.push(newPlatform);
-  points.push(newPoint);
+  // adds platform to a list that contains all platforms objects
+  platforms = []; platforms.push(newPlatform);
+  coins = []; coinIndex = 0; coinsCollected = 0;
 
-  // sets coordinate of the player object to be right on top of the first platform, center the square and velocities to 0
-  player.position.x = newPlatform.position.x - 350; player.position.y = newPlatform.position.y - player.height; player.velocity.x = 0; player.velocity.y = 0; player.cow = 350;
+  // resets the position, velocity, and image of the cow player onto the first platform
+  player.position.x = newPlatform.position.x - 350; player.position.y = newPlatform.position.y - player.height; player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
 
   // start the first frame request
   window.requestAnimationFrame(gameLoop);
@@ -291,40 +352,39 @@ function gameLoop(timeStamp) {
     platforms.push(newPlatform);
   }
 
-  if (newPoint.position.x + newPoint.dimension.x <= player.position.x + 800) {
-    pointIndex += Math.floor(Math.random() * 3) + 2;
-  }
+  if (coinIndex < platforms.length) {    
 
-  if (pointIndex <= platforms.length) {
+    // ranges for the coordinates of the new coin 
+    xCoin = { min: platforms[coinIndex].position.x, max: platforms[coinIndex].position.x + platforms[coinIndex].dimension.x + 200 };
+    yCoin = { min: platforms[coinIndex].position.y - 200, max: platforms[coinIndex].position.y - 120 };
 
-    // ranges for the coordinates of the new point 
-    xPoint = { min: platforms[pointIndex].position.x, max: platforms[pointIndex].position.x + platforms[pointIndex].dimension.x };
-    yPoint = { min: platforms[pointIndex].position.y - player.height, max: platforms[pointIndex].position.y };
-
-    newPoint = new Point({ x: { min: xPoint.min, max: xPoint.max }, y: { min: yPoint.min, max: yPoint.max } });
+    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max } });
 
     // adds the point to the list containing all point objects
-    points.push(newPoint);
+    coins.push(newCoin);
+
+    coinIndex += Math.floor(Math.random() * 3) + 2;
 
   }
 
   // draws all platforms visible on screen 
   for (let i = 0; i < platforms.length; i++) {
-    platforms[i].draw(player.position.x);
+    platforms[i].update(player.position.x);
   }
 
-  // draws all platforms visible on screen 
-  for (let i = 0; i < points.length; i++) {
-    points[i].draw(player.position.x);
-  }
+  // draws all coins visible on screen 
+  for (let i = 0; i < coins.length; i++) {
+    coins[i].update(secondsPassed, player.position.x);
+  }  
 
-  document.getElementById("score").innerHTML = "score: " + score.toString();
+  document.getElementById("score").innerHTML = "score: " + score.toString() + " coins: " + coinsCollected.toString();
 
   if (player.position.y > 500) { // if the player falls into the void the game restarts
     initGame();
   } else { // otherwise new frames countinue being requested by recalling the gameLoop function
     window.requestAnimationFrame(gameLoop);
   }
+
 }
 
 // listens for keydown/keyup events and calls move/stop, the event handler functions
@@ -374,19 +434,15 @@ window.addEventListener("keyup", (event) => {
 });
 
 function changeTheme() {
-  if (backgroundIndex < imageObjects.length - 5) {
-    backgroundIndex += 1;
+  if (themeIndex < 2) {
+    themeIndex += 1;
   } else {
-    backgroundIndex = 0;
+    themeIndex = 0;
   }
 
-  for (let i = 0; i < platforms.length; i++) {
-    platforms[i].colour = platformColours[backgroundIndex];
-  }
-
-  document.getElementById("changeTheme").style.backgroundColor = buttonColours[backgroundIndex];
-  document.getElementById("score").style.color = textColours[backgroundIndex];
-  document.getElementById("controls").style.color = textColours[backgroundIndex];
+  document.getElementById("changeTheme").style.backgroundColor = buttonColours[themeIndex];
+  document.getElementById("score").style.color = textColours[themeIndex];
+  document.getElementById("controls").style.color = textColours[themeIndex];
   
 }
 
