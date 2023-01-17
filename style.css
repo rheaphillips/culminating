@@ -8,23 +8,152 @@ canvas {
   border-radius: 10px;
   background-color:lightcyan;
   position: absolute;
-  left: 20%;
-}
-
-button, #score {
-  display: inline-block;
+  left: 100px;
 }
 
 button {
   border: none;
-  background-color: plum;
+  background-color: mediumpurple;
   color: white;
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 50px;
   padding: 15px 32px;
-  position: relative;
-  left: 20%;
-  top: 530px;
+  position: absolute;
+}
+
+#backgroundtint {
+  position: absolute;
+  
+  width: 800px;
+  height: 500px;
+  
+  left: 100px;
+  top: 10px;
+}
+
+#title {
+  position: absolute;
+  
+  width: 500px;
+  height: 175px;
+  
+  left: 130px;
+  top: 100px;
+}
+
+#play {
+  background-image: url("menu/menu2.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 200px;
+  height: 100px;
+  
+  left: 130px;
+  top: 320px;
+}
+
+#leaderboard {
+  background-image: url("menu/menu6.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 320px;
+  height: 100px;
+  
+  left: 340px;
+  top: 320px;
+}
+
+#shop {
+  background-image: url("menu/menu3.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 200px;
+  height: 100px;
+  
+  left: 670px;
+  top: 100px;
+}
+
+#help {
+  background-image: url("menu/menu4.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 200px;
+  height: 100px;
+  
+  left: 670px;
+  top: 210px;
+}
+
+#settings {
+  background-image: url("menu/menu5.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 200px;
+  height: 100px;
+  
+  left: 670px;
+  top: 320px;
+}
+
+#exit {
+  background-image: url("menu/menu7.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 25px;
+  height: 25px;
+  
+  left: 845px;
+  top: 30px;
+}
+
+#changeTheme {
+  left: 100px;
+  top: 520px;
+}
+
+#music {
+  background-image: url("music buttons/2.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  
+  background-size: contain;
+  width: 50px;
+  height: 50px;
+  
+  position: absolute;
+  left: 820px;
+  top: 440px;
+  visibility: hidden;
+}
+
+#coins {
+  color: white;
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 30px;
+  position: absolute;
+  left: 160px;
+  top: 0px;
+  visibility: hidden;
 }
 
 #score {
@@ -32,8 +161,9 @@ button {
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 30px;
   position: absolute;
-  left: 22%;
-  top: 420px;
+  left: 120px;
+  top: 40px;
+  visibility: hidden;
 }
 
 #controls {
@@ -41,10 +171,11 @@ button {
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 20px;
   position: absolute;
-  left: 22%;
-  top: 10px;
+  left: 120px;
+  top: 375px;
+  visibility: hidden;
 }
 
-button:hover{
-  background-color: lightpink;
+#changeTheme:hover{
+  background-color: plum;
 }

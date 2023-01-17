@@ -1,15 +1,27 @@
- // <img id="ground" src="ground.png" alt="ground">
-
 // declares variableshttps://culminating.rheaphillips.repl.co
-let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 1000, characterColour = "plum", left = false, right = false, up = false, colourIndex, newPlatform, platforms, xPlatform, yPlatform, widthPlatform, heightPlatform, score, platformNum, coins, xCoin, yCoin, coinIndex = 0, coinsCollected = 0, buttonColours = ["plum", "deepskyblue", "mediumpurple"], textColours = ["white", "black", "black"], themeIndex = 0;
+let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 1000, left = false, right = false, up = false, colourIndex, newPlatform, platforms, coins, score, platformNum, coinsCollected = 0, coinIndex = 0, xFinalPosition, startFromMenu = true;
+
+// list of all menu elements
+menuElements = ["play", "leaderboard", "shop", "help", "settings", "title", "backgroundtint"]
+
+// list of all exclusively game elements
+gameElements = ["music", "controls", "coins", "score"]
+
+// rotation lists for changing themes
+buttonColours = ["mediumpurple", "deepskyblue", "steelblue"], textColours = ["white", "black", "black"], musicButtons = ["url('music buttons/1.png')", "url('music buttons/2.png')", "url('music buttons/3.png')", "url('music buttons/4.png')", "url('music buttons/3.png')", "url('music buttons/4.png')"], themeIndex = 0; 
 
 // cow and background sky images
-let imageSources = ["cow right.png", "cow left.png", "sky1.png", "sky2.png", "sky3.png", "brickblock.png", "brickblock.png", "grassblock.png", "mudblock.png", "stoneblock.png", "stoneblock.png"], imageObjects = [], skyDimensions = [[800, 533], [960, 540], [960, 540]];
+let imageSources = ["cow/cow right.png", "cow/cow left.png", "cow/moo right.png", "cow/moo left.png", "sky/sky1.png", "sky/sky2.png", "sky/sky3.png", "platforms/brickblock.png", "platforms/brickblock.png", "platforms/grassblock.png", "platforms/mudblock.png", "platforms/stoneblock.png", "platforms/stoneblock.png"], imageObjects = [], skyDimensions = [[800, 533], [960, 540], [800, 500]];
 
 // coin sprites
 for (let i = 1; i <= 9; i++) {
   imageSources.push("coins/coin" + (i).toString() + ".png");
 }
+
+// audios and releated variables
+let music = [document.getElementById("song1"), document.getElementById("song2"), document.getElementById("song3")]; musicIndex = 0; musicMuted = true; coinAudio = document.getElementById("coinSound");
+
+coinAudio.volume = 0.25
 
 for (let i = 0; i < imageSources.length; i++) {
   let newImage = new Image();
@@ -36,20 +48,27 @@ class Player {
     this.defaultLocation = 350;
     this.prevPosition = 350;
     this.cow = 350;
-    this.isColliding = false;
+    
+    this.platformCollision = false;
+    this.coinCollision = false;
+    
     this.cowImage = imageObjects[0];
+    this.mooImage = imageObjects[2];
+    
+    this.timeStamp = 0;
+    
+    this.coinAudio = coinAudio
   }
 
   // drawing square player onto canvas at the correct coordinates
-  draw() {
+  draw(secondsPassed) {
 
     // clears canvas before loading the next frame
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // draw sky image onto canvas
-    context.drawImage(imageObjects[themeIndex + 2], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
+    context.drawImage(imageObjects[themeIndex + 4], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
 
-    
     // draws different cow sprite depending on the direction the cow is moving
     if (this.velocity.x >= 0) {
       this.cowImage = imageObjects[0];
@@ -59,13 +78,33 @@ class Player {
 
     // draws cow to canvas
     context.drawImage(this.cowImage, this.cow, this.position.y, this.width, this.height);
-    
+
+    // draws moo speech bubble to canvas if cow collects a coin, displaying the sppech bubble for 0.5 seconds
+    if (this.coinCollision == true && this.timeStamp <= 0.5) {     
+
+      this.timeStamp += secondsPassed;
+      
+      if (this.velocity.x >= 0) {
+        this.mooImage = imageObjects[2];
+      } else {
+        this.mooImage = imageObjects[3];
+      }
+
+      // draws moo speech bubble to canvas
+      context.drawImage(this.mooImage, this.cow + 20, this.position.y - 37.5, 52.5, 37.5);
+
+    // in the case the 0.5 seconds run out, the time stamp and collision variable are reset for the next collision
+    } else {
+      this.timeStamp = 0;
+      this.coinCollision = false;
+      
+    }
   }
 
   // detects collisions with platforms
   platformCollisionDetection(platforms) {
 
-    this.isColliding = false;
+    this.platformCollision = false;
 
     // runs through all the platform objects checking whether the player is within the coordinates of that platform
     for (let i = 0; i < platforms.length; i++) {
@@ -74,12 +113,12 @@ class Player {
       // if the coordinates of the square overlap with the platform, the variable indicating collision is set to true
       if (this.position.y + this.height > platform.position.y && this.position.x + this.cow < platform.position.x + platform.dimension.x && this.position.x + this.cow + this.width > platform.position.x && this.position.y < platform.position.y + platform.dimension.y) {
 
-        this.isColliding = true;
+        this.platformCollision = true;
 
         // velocity is reduced by 10% every frame when the square is colliding with a platform, imitating friction 
-        this.velocity.x *= .90;
+        this.velocity.x *= .95;
 
-        platformNum = i + 1;
+        platformNum = i;
 
       }
     }
@@ -94,9 +133,15 @@ class Player {
 
       // if the coordinates of the square overlap with the coin, the coin object is removed from the list of coins
       if (coin.position.y + coin.dimension.y > this.position.y && coin.position.x < this.position.x + this.cow + this.width && coin.position.x + coin.dimension.x > this.position.x + this.cow && coin.position.y < this.position.y + this.height) {
-        coins.splice(i);
+        coins.splice(i); 
 
+        if (musicMuted == false) {
+          this.coinAudio.play();
+        }
+        
         coinsCollected += 1;
+
+        this.coinCollision = true;
 
       }
     }
@@ -123,7 +168,7 @@ class Player {
     // checks if the square is colliding with any of the platform (left and right of the platform since only horizontal velocity has changed)
     this.platformCollisionDetection(platforms);
 
-    if (this.isColliding) {
+    if (this.platformCollision) {
 
       // resets the position of the square to where it was before collision
       if (this.cow == this.defaultLocation) {
@@ -137,13 +182,14 @@ class Player {
       }
 
       // allows player to jump off of the side of walls by allowing player to move diagonally when pressing "w" and touching the platform walls
-      if (up == true && this.velocity.x > 0) {
-        this.velocity.x += 100;
-        this.velocity.y -= 500;
-      } else if (up == true && this.velocity.x < 0) {
-        this.velocity.x -= 100;
-        this.velocity.y -= 500;
-      }
+      if (up == true) {
+        this.velocity.y -= 1000 * secondsPassed;
+        if (this.velocity.x > 0) {
+          this.velocity.x += 2000 * secondsPassed;
+        } else {
+          this.velocity.x -= 2000 * secondsPassed;
+        }
+      } 
     }
   }
 
@@ -159,7 +205,7 @@ class Player {
     // checks if the square is colliding with any of the platform (top and bottom of the platform since only vertical velocity has changed)
     this.platformCollisionDetection(platforms);
 
-    if (this.isColliding) {
+    if (this.platformCollision) {
 
       // updates score if on a platform
       if (score < platformNum) {
@@ -171,24 +217,32 @@ class Player {
       this.velocity.y = 0;
 
       // horizontal velocity decreases by 20 pixels if "a" is pressed while colliding with a block
-      if (left == true) this.velocity.x -= 50;
+      if (left == true && this.velocity.x > -500) this.velocity.x -= 50;
 
       // horizontal velocity increases by 20 pixels if "d" is pressed while colliding with a block
-      if (right == true) this.velocity.x += 50;
+      if (right == true && this.velocity.x < 500) this.velocity.x += 50;
 
       // vertical velocity increases when "w" is pressed
       if (up == true) {
         this.velocity.y -= 500;
       }
+    } else {
+
+      // horizontal velocity decreases by 25 pixels if "a" is pressed mid air
+      if (left == true && this.velocity.x > -500) this.velocity.x -= 5;
+
+      // horizontal velocity increases by 25 pixels if "d" is pressed mid air
+      if (right == true && this.velocity.x < 500) this.velocity.x += 5;
     }
   }
 
   // runs all the nessecary functions for the player
   update(secondsPassed) {
-    this.draw();
+    
+    this.draw(secondsPassed);
     this.horizontalMovement(secondsPassed);
     this.verticalMovement(secondsPassed);
-    this.coinCollisionDetection(coins);
+    this.coinCollisionDetection(coins, secondsPassed);
   }
 }
 
@@ -209,8 +263,8 @@ class Platform {
       x: Math.round((Math.floor(Math.random() * (width.max - width.min)) + width.min)/50)*50,
       y: Math.round((Math.floor(Math.random() * (height.max - height.min)) + width.min)/50)*50,
     }
-    this.topImage = imageObjects[themeIndex*2 + 5];
-    this.insideImage = imageObjects[themeIndex*2 + 6];
+    this.topImage = imageObjects[themeIndex*2 + 7];
+    this.insideImage = imageObjects[themeIndex*2 + 8];
   }
 
   // draws platform to canvas using the randomized coordinates and dimensions
@@ -235,8 +289,8 @@ class Platform {
   }
 
   update(xPlayer) {
-    this.topImage = imageObjects[themeIndex*2 + 5];
-    this.insideImage = imageObjects[themeIndex*2 + 6];
+    this.topImage = imageObjects[themeIndex*2 + 7];
+    this.insideImage = imageObjects[themeIndex*2 + 8];
 
     this.draw(xPlayer);
   }
@@ -256,7 +310,7 @@ class Coin {
       x: 28,
       y: 28,
     }
-    this.image = 11;
+    this.image = 13;
     this.timeStamp = 0;
   }
 
@@ -271,12 +325,14 @@ class Coin {
     this.timeStamp += secondsPassed;
 
     // changes coin sprite every 1 seconds
-    if (this.timeStamp >= 1) {
-      if (this.image == 19) {
-        this.image = 11;
+    if (this.timeStamp >= 0.05) {
+      if (this.image == 21) {
+        this.image = 13;
       } else {
         this.image += 1;
       }
+
+      this.timeStamp = 0;
     }
 
     this.draw(xPlayer);
@@ -299,12 +355,35 @@ function init() {
     // sets canvas to a 2D rendering context for the character canvas element
     context = canvas.getContext("2d");
 
-    initGame();
+    menuScreen()
 
     // if canvas is unsupported by the browser
   } else {
     document.getElementById("canvasNotSupported").innerHTML = "Your browser doesn't support canvas! Please use another browser to play game";
   }
+}
+
+function menuScreen() {
+
+  elementVisibility(gameElements, "hidden");
+  elementVisibility(menuElements, "visible");
+
+  // draw sky image onto canvas
+  context.drawImage(imageObjects[themeIndex + 4], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
+
+  initGame();
+  //player.position.x = -450;
+  //player.cow = 800
+  
+}
+
+function startGame() {
+
+  startFromMenu = true;
+  
+  // start the first frame request
+  window.requestAnimationFrame(gameLoop);
+  
 }
 
 function initGame() {
@@ -314,6 +393,9 @@ function initGame() {
 
   // first platform object
   newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
+
+  // coin object for coin counter
+  coinCounter = new Coin({ x: { min: 20, max: 20 }, y: { min: 25, max: 25 } });
 
   // set score and colliding platform number counter to 0
   score = 0;
@@ -326,9 +408,6 @@ function initGame() {
   // resets the position, velocity, and image of the cow player onto the first platform
   player.position.x = newPlatform.position.x - 350; player.position.y = newPlatform.position.y - player.height; player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
 
-  // start the first frame request
-  window.requestAnimationFrame(gameLoop);
-
 }
 
 function gameLoop(timeStamp) {
@@ -336,6 +415,36 @@ function gameLoop(timeStamp) {
   // calculates how manu seconds have passed since the last frame request in order to accurately calculate the location of the character using it's constant speed
   secondsPassed = (timeStamp - oldTimeStamp) / 1000;
   oldTimeStamp = timeStamp;
+
+  if (startFromMenu) {
+
+    elementVisibility(gameElements, "visible");
+    elementVisibility(menuElements, "hidden");
+
+    /* player.position.x += 5;
+    player.cow -= 5
+    
+    if (player.position.x >= 0) {
+      startFromMenu = false;
+      player.position.x = 0
+      player.cow = 350
+    } */
+    
+  }
+    
+  eventListener("keydown", true);
+  eventListener("keyup", false);
+  
+
+  if (music[musicIndex].ended) {
+    music[musicIndex].pause();
+    if (musicIndex == 2) {
+      musicIndex = 0;
+    } else {
+      musicIndex += 1;
+    }
+    music[musicIndex].play();
+  }
 
   player.update(secondsPassed);
 
@@ -364,8 +473,9 @@ function gameLoop(timeStamp) {
     coins.push(newCoin);
 
     coinIndex += Math.floor(Math.random() * 3) + 2;
-
   }
+  
+  createCoin(platforms, coins, coinIndex);
 
   // draws all platforms visible on screen 
   for (let i = 0; i < platforms.length; i++) {
@@ -377,61 +487,90 @@ function gameLoop(timeStamp) {
     coins[i].update(secondsPassed, player.position.x);
   }  
 
-  document.getElementById("score").innerHTML = "score: " + score.toString() + " coins: " + coinsCollected.toString();
+  // updates annimation for coin counter
+  coinCounter.update(secondsPassed, 0);
+
+  document.getElementById("coins").innerHTML = coinsCollected.toString();
+  document.getElementById("score").innerHTML = "score: " + score.toString();
 
   if (player.position.y > 500) { // if the player falls into the void the game restarts
     initGame();
+    window.requestAnimationFrame(gameLoop);
   } else { // otherwise new frames countinue being requested by recalling the gameLoop function
     window.requestAnimationFrame(gameLoop);
   }
 
 }
 
-// listens for keydown/keyup events and calls move/stop, the event handler functions
+function createPlatform(newPlatform, player, platforms) {
+  
+  // creates the next platform object after the furthest one visible on screen is 100 pixels away from the right edge
+  if (newPlatform.position.x + newPlatform.dimension.x + player.width <= player.position.x + 800) {
 
-window.addEventListener("keydown", (event) => {
+    // the randomized x-coordinate of the new platform is within 100 pixels from 
+    xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 200;
+    xPlatform.max = xPlatform.min + 100;
 
-  // the keyCode of the key that's pressed is compared with the four arrow key cases
-  switch (event.key) {
+    newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
 
-    // left key pressed
+    // adds the platform to the list containing all platform objects
+    platforms.push(newPlatform);
+  }
+  
+}
+
+function createCoin(platforms, coins, coinIndex) {
+
+  if (coinIndex < platforms.length) {    
+
+    // ranges for the coordinates of the new coin 
+    xCoin = { min: platforms[coinIndex].position.x, max: platforms[coinIndex].position.x + platforms[coinIndex].dimension.x + 200 };
+    yCoin = { min: platforms[coinIndex].position.y - 200, max: platforms[coinIndex].position.y - 120 };
+
+    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max } });
+
+    // adds the point to the list containing all point objects
+    coins.push(newCoin);
+
+    coinIndex += Math.floor(Math.random() * 3) + 2;
+  }
+}
+
+
+// listens for keydown/keyup events for keys "a", "d" and "w"
+function eventListener(eventType, state) {
+  
+  window.addEventListener(eventType, (event) => {
+
+  // the keyCode of the key that's pressed is compared with the three key cases ("a", "d" and "w")
+  switch (event.key.toLowerCase()) {
+
+    // left key pressed/released
     case "a":
-      left = true;
+      left = state;
       break;
 
-    // right key pressed
+    // right key pressed/released
     case "d":
-      right = true;
+      right = state;
       break;
 
-    // up key pressed
+    // up key pressed/released
     case "w":
-      up = true;
+      up = state;
       break;
   }
 });
 
-window.addEventListener("keyup", (event) => {
+}
 
-  // the keyCode of the key that's released is compared with the four arrow key cases
-  switch (event.key) {
-
-    // left key released
-    case "a":
-      left = false;
-      break;
-
-    // right key released
-    case "d":
-      right = false;
-      break;
-
-    // up key released
-    case "w":
-      up = false;
-      break;
-  }
-});
+function elementVisibility(list, status) {
+  
+  for (let i = 0; i < list.length; i++) {
+    document.getElementById(list[i]).style.visibility=status;
+  } 
+  
+}
 
 function changeTheme() {
   if (themeIndex < 2) {
@@ -441,8 +580,32 @@ function changeTheme() {
   }
 
   document.getElementById("changeTheme").style.backgroundColor = buttonColours[themeIndex];
+  document.getElementById("coins").style.color = textColours[themeIndex];
   document.getElementById("score").style.color = textColours[themeIndex];
   document.getElementById("controls").style.color = textColours[themeIndex];
+
+  if (music[musicIndex].paused == true) {
+    document.getElementById("music").style.backgroundImage = musicButtons[themeIndex*2 + 1];
+  } else {
+    document.getElementById("music").style.backgroundImage = musicButtons[themeIndex*2];
+  }
+  
+}
+
+function playMusic() {
+  
+  if (music[musicIndex].paused == true) {
+    music[musicIndex].play();
+    document.getElementById("music").style.backgroundImage = musicButtons[themeIndex*2];
+    
+    musicMuted = false
+    
+  } else {
+    music[musicIndex].pause();
+    document.getElementById("music").style.backgroundImage = musicButtons[themeIndex*2 + 1];
+    
+    musicMuted = true
+  }
   
 }
 
