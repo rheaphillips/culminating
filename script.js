@@ -1,14 +1,19 @@
 // declares variableshttps://culminating.rheaphillips.repl.co
-let canvas, context, secondsPassed, oldTimeStamp = 0, gravity = 1000, left = false, right = false, up = false, colourIndex, newPlatform, platforms, coins, score, platformNum, coinsCollected = 0, coinIndex = 0, xFinalPosition, startFromMenu = true;
+let canvas, context, coinCanvas, coinContext, secondsPassed, oldTimeStamp = 0, gravity = 1000, left = false, right = false, up = false, colourIndex, newPlatform, platforms, coins, score, platformNum, coinIndex = 1, xFinalPosition, startFromMenu = true, time = new Date(), menu = false, replay = false, revive = false;
 
-// list of all menu elements
+if (localStorage.getItem("coins") == null) {
+  localStorage.setItem("coins", "0");
+}
+
+let coinsCollected = parseInt(localStorage.getItem("coins"))
+
+// lists containing HTML elements for different pages
 menuElements = ["play", "leaderboard", "shop", "help", "settings", "title", "backgroundtint"]
-
-// list of all exclusively game elements
 gameElements = ["music", "controls", "coins", "score"]
+gameOverElements = ["revive", "replay", "menu"]
 
 // rotation lists for changing themes
-buttonColours = ["mediumpurple", "deepskyblue", "steelblue"], textColours = ["white", "black", "black"], musicButtons = ["url('music buttons/1.png')", "url('music buttons/2.png')", "url('music buttons/3.png')", "url('music buttons/4.png')", "url('music buttons/3.png')", "url('music buttons/4.png')"], themeIndex = 0; 
+buttonColours = ["mediumpurple", "deepskyblue", "steelblue"], textColours = ["white", "black", "black"], musicButtons = ["url('game/1.png')", "url('game/2.png')", "url('game/3.png')", "url('game/4.png')", "url('game/3.png')", "url('game/4.png')"], themeIndex = 0; 
 
 // cow and background sky images
 let imageSources = ["cow/cow right.png", "cow/cow left.png", "cow/moo right.png", "cow/moo left.png", "sky/sky1.png", "sky/sky2.png", "sky/sky3.png", "platforms/brickblock.png", "platforms/brickblock.png", "platforms/grassblock.png", "platforms/mudblock.png", "platforms/stoneblock.png", "platforms/stoneblock.png"], imageObjects = [], skyDimensions = [[800, 533], [960, 540], [800, 500]];
@@ -301,7 +306,7 @@ class Platform {
 class Coin {
 
   // randomizes coordinates and dimensions, within the given range
-  constructor({ x, y }) {
+  constructor({ x, y, context }) {
     this.position = {
       x: Math.floor(Math.random() * (x.max - x.min)) + x.min,
       y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
@@ -312,12 +317,13 @@ class Coin {
     }
     this.image = 13;
     this.timeStamp = 0;
+    this.context = context
   }
 
   // draws coin object to canvas using the randomized coordinates
   draw(xPlayer) {
 
-    context.drawImage(imageObjects[this.image], this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
+    this.context.drawImage(imageObjects[this.image], this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
   }
 
   update(secondsPassed, xPlayer) {
@@ -346,14 +352,20 @@ let player = new Player();
 // initiallizes the HTML canvas
 function init() {
 
-  // sets canvas to the display <canvas> element
+  // sets canvas to the display and gameOverCoin <canvas> elements
   canvas = document.getElementById("display");
+  coinCanvas = document.getElementById("gameOverCoin");
 
   // checks if browser supports <canvas>
   if (canvas.getContext) {
 
     // sets canvas to a 2D rendering context for the character canvas element
     context = canvas.getContext("2d");
+    coinContext = coinCanvas.getContext("2d");
+
+    // disables image smoothing so pixels look sharp
+    context.imageSmoothingEnabled = false;
+    coinContext.imageSmoothingEnabled = false;
 
     menuScreen()
 
@@ -366,36 +378,58 @@ function init() {
 function menuScreen() {
 
   elementVisibility(gameElements, "hidden");
+  elementVisibility(gameOverElements, "hidden");
   elementVisibility(menuElements, "visible");
 
   // draw sky image onto canvas
   context.drawImage(imageObjects[themeIndex + 4], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
 
-  initGame();
-  //player.position.x = -450;
-  //player.cow = 800
-  
+  menu = false;
+
 }
 
-function startGame() {
+function gameOver() {
 
-  startFromMenu = true;
-  
-  // start the first frame request
-  window.requestAnimationFrame(gameLoop);
-  
+  document.getElementById("backgroundtint").style.visibility="visible";
+  elementVisibility(gameOverElements, "visible");
+
+  document.getElementById("menu").addEventListener("click", function() { menu = true });
+  document.getElementById("replay").addEventListener("click",  function() { replay = true });
+  document.getElementById("revive").addEventListener("click", function() { revive = true });
+
+  if (menu == true) {
+    menuScreen();
+  } else if (replay == true) {
+    initGame();
+  } else if (revive == true) {
+    
+    if (coinsCollected >= 5) {
+      coinsCollected -= 5;
+      player.position.x = platforms[platforms.length - 2].position.x - 350; player.position.y = -200 
+      player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
+
+      window.requestAnimationFrame(gameLoop);
+    } else {
+      revive = false;
+    }
+    
+  } else {
+    window.requestAnimationFrame(gameOver);
+  }
 }
 
 function initGame() {
 
+  replay = false
+  
   // ranges for the coordinates and dimensions of the first platform 
   xPlatform = { min: 100, max: 200 }, yPlatform = { min: 200, max: 300 }, widthPlatform = { min: 100, max: 200 }, heightPlatform = { min: 100, max: 200 };
 
   // first platform object
   newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
 
-  // coin object for coin counter
-  coinCounter = new Coin({ x: { min: 20, max: 20 }, y: { min: 25, max: 25 } });
+  // coin objects for coin counter and replay button
+  decorativeCoins = [new Coin({ x: { min: 20, max: 20 }, y: { min: 25, max: 25 }, context: context }), new Coin({ x: { min: 440, max: 440 }, y: { min: 175, max: 175 }, context: coinContext })];
 
   // set score and colliding platform number counter to 0
   score = 0;
@@ -403,38 +437,30 @@ function initGame() {
 
   // adds platform to a list that contains all platforms objects
   platforms = []; platforms.push(newPlatform);
-  coins = []; coinIndex = 0; coinsCollected = 0;
+  coins = []; coinIndex = 1;
 
   // resets the position, velocity, and image of the cow player onto the first platform
-  player.position.x = newPlatform.position.x - 350; player.position.y = newPlatform.position.y - player.height; player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
+  player.position.x = newPlatform.position.x - 350; player.position.y = -200 
+  
+  player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
 
+  // sets HTML game elements to visible and hides all other elements
+  elementVisibility(gameElements, "visible");
+  elementVisibility(gameOverElements, "hidden");
+  elementVisibility(menuElements, "hidden");
+
+  // start the first frame request
+  window.requestAnimationFrame(gameLoop);
 }
 
 function gameLoop(timeStamp) {
 
   // calculates how manu seconds have passed since the last frame request in order to accurately calculate the location of the character using it's constant speed
-  secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+  secondsPassed = Math.min((timeStamp - oldTimeStamp) / 1000, .5);
   oldTimeStamp = timeStamp;
-
-  if (startFromMenu) {
-
-    elementVisibility(gameElements, "visible");
-    elementVisibility(menuElements, "hidden");
-
-    /* player.position.x += 5;
-    player.cow -= 5
-    
-    if (player.position.x >= 0) {
-      startFromMenu = false;
-      player.position.x = 0
-      player.cow = 350
-    } */
-    
-  }
-    
+  
   eventListener("keydown", true);
   eventListener("keyup", false);
-  
 
   if (music[musicIndex].ended) {
     music[musicIndex].pause();
@@ -445,9 +471,9 @@ function gameLoop(timeStamp) {
     }
     music[musicIndex].play();
   }
-
+  
   player.update(secondsPassed);
-
+  
   // creates the next platform object after the furthest one visible on screen is 100 pixels away from the right edge
   if (newPlatform.position.x + newPlatform.dimension.x + player.width <= player.position.x + 800) {
 
@@ -460,22 +486,20 @@ function gameLoop(timeStamp) {
     // adds the platform to the list containing all platform objects
     platforms.push(newPlatform);
   }
-
+  
   if (coinIndex < platforms.length) {    
 
     // ranges for the coordinates of the new coin 
     xCoin = { min: platforms[coinIndex].position.x, max: platforms[coinIndex].position.x + platforms[coinIndex].dimension.x + 200 };
     yCoin = { min: platforms[coinIndex].position.y - 200, max: platforms[coinIndex].position.y - 120 };
 
-    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max } });
+    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max }, context: context });
 
     // adds the point to the list containing all point objects
     coins.push(newCoin);
 
     coinIndex += Math.floor(Math.random() * 3) + 2;
   }
-  
-  createCoin(platforms, coins, coinIndex);
 
   // draws all platforms visible on screen 
   for (let i = 0; i < platforms.length; i++) {
@@ -488,54 +512,18 @@ function gameLoop(timeStamp) {
   }  
 
   // updates annimation for coin counter
-  coinCounter.update(secondsPassed, 0);
+  decorativeCoins[0].update(secondsPassed, 0);
 
-  document.getElementById("coins").innerHTML = coinsCollected.toString();
+  document.getElementById("coins").innerHTML = "X " + coinsCollected.toString();
   document.getElementById("score").innerHTML = "score: " + score.toString();
 
   if (player.position.y > 500) { // if the player falls into the void the game restarts
-    initGame();
-    window.requestAnimationFrame(gameLoop);
+    window.requestAnimationFrame(gameOver);
   } else { // otherwise new frames countinue being requested by recalling the gameLoop function
     window.requestAnimationFrame(gameLoop);
   }
 
 }
-
-function createPlatform(newPlatform, player, platforms) {
-  
-  // creates the next platform object after the furthest one visible on screen is 100 pixels away from the right edge
-  if (newPlatform.position.x + newPlatform.dimension.x + player.width <= player.position.x + 800) {
-
-    // the randomized x-coordinate of the new platform is within 100 pixels from 
-    xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 200;
-    xPlatform.max = xPlatform.min + 100;
-
-    newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
-
-    // adds the platform to the list containing all platform objects
-    platforms.push(newPlatform);
-  }
-  
-}
-
-function createCoin(platforms, coins, coinIndex) {
-
-  if (coinIndex < platforms.length) {    
-
-    // ranges for the coordinates of the new coin 
-    xCoin = { min: platforms[coinIndex].position.x, max: platforms[coinIndex].position.x + platforms[coinIndex].dimension.x + 200 };
-    yCoin = { min: platforms[coinIndex].position.y - 200, max: platforms[coinIndex].position.y - 120 };
-
-    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max } });
-
-    // adds the point to the list containing all point objects
-    coins.push(newCoin);
-
-    coinIndex += Math.floor(Math.random() * 3) + 2;
-  }
-}
-
 
 // listens for keydown/keyup events for keys "a", "d" and "w"
 function eventListener(eventType, state) {
@@ -620,3 +608,9 @@ function colourRandom() {
   // picks a random colour from the colour list using the randomized index
   characterColour = "rgb(" + red + ", " + green + ", " + blue + ")";
 };
+
+function saveData() {
+
+  localStorage.setItem("coins", coinsCollected.toString());
+  
+}

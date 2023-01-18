@@ -6,19 +6,26 @@ html, body {
 
 canvas {
   border-radius: 10px;
-  background-color:lightcyan;
+  background-color: transparent;
   position: absolute;
   left: 100px;
 }
 
 button {
-  border: none;
-  background-color: mediumpurple;
-  color: white;
-  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  font-size: 50px;
-  padding: 15px 32px;
   position: absolute;
+  padding: 15px 32px;
+  
+  border: none;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  background-size: contain;
+
+  width: 200px;
+  height: 100px;
+  
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: white;
+  font-size: 50px;
 }
 
 #backgroundtint {
@@ -41,27 +48,48 @@ button {
   top: 100px;
 }
 
-#play {
-  background-image: url("menu/menu2.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
+#revive {
+  background-image: url("game over/3.png");
   
-  background-size: contain;
-  width: 200px;
+  width: 320px;
   height: 100px;
+  visibility: hidden;
+  
+  left: 340px;
+  top: 155px;
+}
+
+#menu {
+  background-image: url("game over/1.png");
+  visibility: hidden;
+  
+  left: 295px;
+  top: 265px;
+}
+
+#replay {
+  background-image: url("game over/2.png");
+  visibility: hidden;
+  
+  left: 505px;
+  top: 265px;
+}
+
+#gameOverCoin {
+  left: 440px;
+  top: 175px;
+}
+
+#play {
+  background-image: url("menu/2.png");
   
   left: 130px;
   top: 320px;
 }
 
 #leaderboard {
-  background-image: url("menu/menu6.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
-  
-  background-size: contain;
+  background-image: url("menu/6.png");
+
   width: 320px;
   height: 100px;
   
@@ -70,54 +98,29 @@ button {
 }
 
 #shop {
-  background-image: url("menu/menu3.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
-  
-  background-size: contain;
-  width: 200px;
-  height: 100px;
+  background-image: url("menu/3.png");
   
   left: 670px;
   top: 100px;
 }
 
 #help {
-  background-image: url("menu/menu4.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
-  
-  background-size: contain;
-  width: 200px;
-  height: 100px;
+  background-image: url("menu/4.png");
   
   left: 670px;
   top: 210px;
 }
 
 #settings {
-  background-image: url("menu/menu5.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
-  
-  background-size: contain;
-  width: 200px;
-  height: 100px;
+  background-image: url("menu/5.png");
   
   left: 670px;
   top: 320px;
 }
 
 #exit {
-  background-image: url("menu/menu7.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
+  background-image: url("menu/7.png");
   
-  background-size: contain;
   width: 25px;
   height: 25px;
   
@@ -131,19 +134,14 @@ button {
 }
 
 #music {
-  background-image: url("music buttons/2.png");
-  background-repeat: no-repeat;
-  background-color: transparent;
-  border: none;
+  background-image: url("game/2.png");
+  visibility: hidden;
   
-  background-size: contain;
   width: 50px;
   height: 50px;
   
-  position: absolute;
   left: 820px;
   top: 440px;
-  visibility: hidden;
 }
 
 #coins {

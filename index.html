@@ -9,26 +9,31 @@
 </head>
 
 <body>
+  
   <canvas id="display" width="800" height="500"></canvas>
   <p id="canvasNotSupported"></p>
   
   <button id="changeTheme" type="button" onclick="changeTheme();">change theme</button>
 
+  <button id="music" type="button" onclick="playMusic()"></button>
+  <p id="controls">Controls:<br>w = up / jumping off walls<br>a = left<br>d = right</p>
+  <p id="coins"></p>
+  <p id="score"></p>
+  
   <img id="backgroundtint" src="menu/backgroundtint.png" alt="backgroundtint">
-  <img id="title" src="menu/menu1.png" alt="MOO!">
+  <img id="title" src="menu/1.png" alt="MOO!">
 
-  <button id="play" type="button" onclick="startGame();"></button>
+  <button id="play" type="button" onclick="initGame();"></button>
   <button id="leaderboard" type="button"></button>
   <button id="shop" type="button"></button>
   <button id="help" type="button"></button>
   <button id="settings" type="button"></button>
-  <button id="exit" type="button"></button>
-  
-  <button id="music" type="button" onclick="playMusic()"></button>
-  
-  <p id="controls">Controls:<br>w = up / jumping off walls<br>a = left<br>d = right</p>
-  <p id="coins"></p>
-  <p id="score"></p>
+  <button id="exit" type="button" onclick="saveData();"></button>
+
+  <button id="revive" type="button"></button>
+  <button id="replay" type="button"></button>
+  <button id="menu" type="button"></button>
+  <canvas id="gameOverCoin" width="28" height="28"></canvas>
 
   <audio id="song1" src="music/song1.mp3"></audio>
   <audio id="song2" src="music/song2.mp3"></audio>
