@@ -1,41 +1,33 @@
-// declares variableshttps://culminating.rheaphillips.repl.co
-let canvas, context, coinCanvas, coinContext, secondsPassed, oldTimeStamp = 0, gravity = 1000, left = false, right = false, up = false, colourIndex, newPlatform, platforms, coins, score, platformNum, coinIndex = 1, xFinalPosition, startFromMenu = true, time = new Date(), menu = false, replay = false, revive = false;
-
-if (localStorage.getItem("coins") == null) {
-  localStorage.setItem("coins", "0");
-}
-
-let coinsCollected = parseInt(localStorage.getItem("coins"))
+// declares variables
+let canvas, context, secondsPassed, oldTimeStamp = 0, left = false, right = false, up = false, newPlatform, platforms, coins, coinIndex = 1, xPlatform, yPlatform, widthPlatform, heightPlatform, returnToMenu = false;
 
 // lists containing HTML elements for different pages
-menuElements = ["play", "leaderboard", "shop", "help", "settings", "title", "backgroundtint"]
-gameElements = ["music", "controls", "coins", "score"]
-gameOverElements = ["revive", "replay", "menu"]
+let homepageElements = ["newUser", "returningUser"], loginElements = ["username", "password", "usernameLabel", "passwordLabel", "submit"], menuElements = ["play", "leaderboard", "shop", "help", "settings", "title", "backgroundtint"], gameElements = ["music", "controls", "coins", "score"], gameOverElements = ["revive", "replay", "menu"];
 
 // rotation lists for changing themes
-buttonColours = ["mediumpurple", "deepskyblue", "steelblue"], textColours = ["white", "black", "black"], musicButtons = ["url('game/1.png')", "url('game/2.png')", "url('game/3.png')", "url('game/4.png')", "url('game/3.png')", "url('game/4.png')"], themeIndex = 0; 
+let buttonColours = ["mediumpurple", "deepskyblue", "steelblue"], textColours = ["white", "black", "black"], musicButtons = ["url('game/1.png')", "url('game/2.png')", "url('game/3.png')", "url('game/4.png')", "url('game/3.png')", "url('game/4.png')"], themeIndex = 0; 
 
-// cow and background sky images
-let imageSources = ["cow/cow right.png", "cow/cow left.png", "cow/moo right.png", "cow/moo left.png", "sky/sky1.png", "sky/sky2.png", "sky/sky3.png", "platforms/brickblock.png", "platforms/brickblock.png", "platforms/grassblock.png", "platforms/mudblock.png", "platforms/stoneblock.png", "platforms/stoneblock.png"], imageObjects = [], skyDimensions = [[800, 533], [960, 540], [800, 500]];
+// creating a list containing all image sources
+let imageSources = ["cow/cow right.png", "cow/cow left.png", "cow/moo right.png", "cow/moo left.png", "sky/sky1.png", "sky/sky2.png", "sky/sky3.png", "platforms/brickblock.png", "platforms/brickblock.png", "platforms/grassblock.png", "platforms/mudblock.png", "platforms/stoneblock.png", "platforms/stoneblock.png"];
 
-// coin sprites
+// appending coin sprites to the list of image sources
 for (let i = 1; i <= 9; i++) {
   imageSources.push("coins/coin" + (i).toString() + ".png");
 }
 
-// audios and releated variables
-let music = [document.getElementById("song1"), document.getElementById("song2"), document.getElementById("song3")]; musicIndex = 0; musicMuted = true; coinAudio = document.getElementById("coinSound");
-
-coinAudio.volume = 0.25
-
+// creates image objects using the image sources and appends them to a list
+let imageObjects = []
 for (let i = 0; i < imageSources.length; i++) {
   let newImage = new Image();
   newImage.src = imageSources[i];
   imageObjects.push(newImage);
 }
 
-// runs initialization function as soon as window loads
-window.onload = init;
+// list containing the dimensions of the different sky background images
+let skyDimensions = [[800, 533], [960, 540], [800, 500]];
+
+// audios and releated variables
+let music = [document.getElementById("song1"), document.getElementById("song2"), document.getElementById("song3")], musicIndex = 0, musicMuted = true;
 
 // class contains all the functions needed to create a player object, and draw and move it around the screen
 class Player {
@@ -51,7 +43,6 @@ class Player {
     this.width = 98;
     this.height = 59;
     this.defaultLocation = 350;
-    this.prevPosition = 350;
     this.cow = 350;
     
     this.platformCollision = false;
@@ -62,11 +53,21 @@ class Player {
     
     this.timeStamp = 0;
     
-    this.coinAudio = coinAudio
+    this.coinAudio = document.getElementById("coinSound");
+
+    this.score = 0;
+    this.platformNum = 0;
+
+    if (localStorage.getItem("coins") == null) {
+      localStorage.setItem("coins", "0");
+    }
+
+    this.coinsCollected = parseInt(localStorage.getItem("coins"))
+    
   }
 
   // drawing square player onto canvas at the correct coordinates
-  draw(secondsPassed) {
+  draw(secondsPassed, themeIndex) {
 
     // clears canvas before loading the next frame
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -120,17 +121,17 @@ class Player {
 
         this.platformCollision = true;
 
-        // velocity is reduced by 10% every frame when the square is colliding with a platform, imitating friction 
-        this.velocity.x *= .95;
+        // velocity is reduced by 10% for every frame the square is colliding with a platform, imitating friction 
+        this.velocity.x *= .90;
 
-        platformNum = i;
+        this.platformNum = i;
 
       }
     }
   }
 
   // detects collisions with coins
-  coinCollisionDetection(coins) {
+  coinCollisionDetection(coins, musicMuted) {
 
     // runs through all the platform objects checking whether the player is within the coordinates of that platform
     for (let i = 0; i < coins.length; i++) {
@@ -141,10 +142,11 @@ class Player {
         coins.splice(i); 
 
         if (musicMuted == false) {
+          this.coinAudio.volume = 0.25
           this.coinAudio.play();
         }
         
-        coinsCollected += 1;
+        this.coinsCollected += 1;
 
         this.coinCollision = true;
 
@@ -153,7 +155,7 @@ class Player {
   }
 
   // updates horizontal velocity of the character and adjusts player motion if the new velocity causes collision
-  horizontalMovement(secondsPassed) {
+  horizontalMovement(secondsPassed, up, platforms) {
 
     // horizontal position updated using new velocity and the number of seconds that have passed since the last frame
 
@@ -199,10 +201,10 @@ class Player {
   }
 
   // updates vertical velocity of the character and adjusts player motion if the new velocity causes collision
-  verticalMovement(secondsPassed) {
+  verticalMovement(secondsPassed, left, right, up, platforms) {
 
     // vertical velocity constantly impacted by acceleration due to gravity 
-    this.velocity.y += gravity * secondsPassed;
+    this.velocity.y += 1000 * secondsPassed;
 
     // vertical position updated using new velocity and the number of seconds that have passed since the last frame
     this.position.y += this.velocity.y * secondsPassed;
@@ -213,8 +215,8 @@ class Player {
     if (this.platformCollision) {
 
       // updates score if on a platform
-      if (score < platformNum) {
-        score = platformNum
+      if (this.score < this.platformNum) {
+        this.score = this.platformNum
       }
 
       // resets the position of the square to where it was before collision
@@ -222,32 +224,32 @@ class Player {
       this.velocity.y = 0;
 
       // horizontal velocity decreases by 20 pixels if "a" is pressed while colliding with a block
-      if (left == true && this.velocity.x > -500) this.velocity.x -= 50;
+      if (left == true && this.velocity.x > -500) this.velocity.x -= 2500 * secondsPassed;
 
       // horizontal velocity increases by 20 pixels if "d" is pressed while colliding with a block
-      if (right == true && this.velocity.x < 500) this.velocity.x += 50;
+      if (right == true && this.velocity.x < 500) this.velocity.x += 2500 * secondsPassed;
 
       // vertical velocity increases when "w" is pressed
       if (up == true) {
-        this.velocity.y -= 500;
+        this.velocity.y -= 15000 * secondsPassed;
       }
     } else {
 
       // horizontal velocity decreases by 25 pixels if "a" is pressed mid air
-      if (left == true && this.velocity.x > -500) this.velocity.x -= 5;
+      if (left == true && this.velocity.x > -500) this.velocity.x -= 500 * secondsPassed;
 
       // horizontal velocity increases by 25 pixels if "d" is pressed mid air
-      if (right == true && this.velocity.x < 500) this.velocity.x += 5;
+      if (right == true && this.velocity.x < 500) this.velocity.x += 500 * secondsPassed;
     }
   }
 
   // runs all the nessecary functions for the player
-  update(secondsPassed) {
+  update(secondsPassed, themeIndex, up, left, right, platforms, coins, musicMuted) {
     
-    this.draw(secondsPassed);
-    this.horizontalMovement(secondsPassed);
-    this.verticalMovement(secondsPassed);
-    this.coinCollisionDetection(coins, secondsPassed);
+    this.draw(secondsPassed, themeIndex);
+    this.horizontalMovement(secondsPassed, up, platforms);
+    this.verticalMovement(secondsPassed, left, right, up, platforms);
+    this.coinCollisionDetection(coins, musicMuted);
   }
 }
 
@@ -255,7 +257,7 @@ class Player {
 class Platform {
 
   // randomizes coordinates and dimensions, within the given range
-  constructor({ x, y, width, height }) {
+  constructor({ x, y, width, height, themeIndex }) {
     this.position = {
       x: Math.floor(Math.random() * (x.max - x.min)) + x.min,
       y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
@@ -306,7 +308,7 @@ class Platform {
 class Coin {
 
   // randomizes coordinates and dimensions, within the given range
-  constructor({ x, y, context }) {
+  constructor({ x, y }) {
     this.position = {
       x: Math.floor(Math.random() * (x.max - x.min)) + x.min,
       y: Math.floor(Math.random() * (y.max - y.min)) + y.min,
@@ -317,13 +319,12 @@ class Coin {
     }
     this.image = 13;
     this.timeStamp = 0;
-    this.context = context
   }
 
   // draws coin object to canvas using the randomized coordinates
   draw(xPlayer) {
 
-    this.context.drawImage(imageObjects[this.image], this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
+    context.drawImage(imageObjects[this.image], this.position.x - xPlayer, this.position.y, this.dimension.x, this.dimension.y);
   }
 
   update(secondsPassed, xPlayer) {
@@ -346,28 +347,26 @@ class Coin {
   }
 }
 
-// create player object
-let player = new Player();
+// runs initialization function as soon as window loads
+window.onload = init;
 
 // initiallizes the HTML canvas
 function init() {
 
   // sets canvas to the display and gameOverCoin <canvas> elements
   canvas = document.getElementById("display");
-  coinCanvas = document.getElementById("gameOverCoin");
 
   // checks if browser supports <canvas>
   if (canvas.getContext) {
 
     // sets canvas to a 2D rendering context for the character canvas element
     context = canvas.getContext("2d");
-    coinContext = coinCanvas.getContext("2d");
 
     // disables image smoothing so pixels look sharp
     context.imageSmoothingEnabled = false;
-    coinContext.imageSmoothingEnabled = false;
 
-    menuScreen()
+    // draw sky image onto canvas
+    context.drawImage(imageObjects[themeIndex + 4], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
 
     // if canvas is unsupported by the browser
   } else {
@@ -375,65 +374,99 @@ function init() {
   }
 }
 
+// create player object
+let player = new Player();
+
+// checks if a user input contains spaces (used for error checking while logging in)
+function checkInputForSpaces(text, message) {
+  for (i = 0; i < text.split("").length; i++) {
+    if (text.split("")[i] == " ") {
+      return true;
+    }
+  } return false;
+}
+
+
+// error checks username and password inputs
+function loginScreen() {
+
+  let username = document.getElementById("username").value;
+  let password = document.getElementById("password").value;
+  let validLogin = true;
+  let message1 = "", message2 = "";
+
+  // ensures there are no spacees in the username/password
+  if (checkInputForSpaces(username, "username") || checkInputForSpaces(password, "password")) {
+    validLogin = false;
+    message1 = " Make sure there are no spaces!";
+  }
+
+  // ensures password is at least 4 characters in length
+  if (password.split("").length < 4) {
+    message2 = " Must be 4-20 characters in length!";
+    password = "";
+    validLogin = false;
+  }
+
+  if (validLogin == true) {
+    menuScreen();
+  } else {
+    document.getElementById("error").innerHTML = "Invalid username/password!" + message1 + message2;
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+  }
+  
+}
+
 function menuScreen() {
 
   elementVisibility(gameElements, "hidden");
   elementVisibility(gameOverElements, "hidden");
+  elementVisibility(loginElements, "hidden");
+  
   elementVisibility(menuElements, "visible");
+
+  let title = document.getElementById("title").style
+  
+  title.width = "500px";
+  title.height = "175px";
+  title.left = "130px";
+  title.top = "100px";
 
   // draw sky image onto canvas
   context.drawImage(imageObjects[themeIndex + 4], 0, 0, skyDimensions[themeIndex][0], skyDimensions[themeIndex][1]);
 
-  menu = false;
-
 }
 
-function gameOver() {
+function revive() {
 
-  document.getElementById("backgroundtint").style.visibility="visible";
-  elementVisibility(gameOverElements, "visible");
+  if (player.coinsCollected >= 5) {
+    player.coinsCollected -= 5;
+    player.position.x = platforms[player.score].position.x - 350; player.position.y = -200 
+    player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
 
-  document.getElementById("menu").addEventListener("click", function() { menu = true });
-  document.getElementById("replay").addEventListener("click",  function() { replay = true });
-  document.getElementById("revive").addEventListener("click", function() { revive = true });
-
-  if (menu == true) {
-    menuScreen();
-  } else if (replay == true) {
-    initGame();
-  } else if (revive == true) {
-    
-    if (coinsCollected >= 5) {
-      coinsCollected -= 5;
-      player.position.x = platforms[platforms.length - 2].position.x - 350; player.position.y = -200 
-      player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
-
-      window.requestAnimationFrame(gameLoop);
-    } else {
-      revive = false;
-    }
-    
-  } else {
-    window.requestAnimationFrame(gameOver);
+    document.getElementById("backgroundtint").style.visibility="hidden";
+    elementVisibility(gameOverElements, "hidden");
   }
+  
 }
 
 function initGame() {
 
-  replay = false
-  
+  returnToMenu = false;
+
   // ranges for the coordinates and dimensions of the first platform 
   xPlatform = { min: 100, max: 200 }, yPlatform = { min: 200, max: 300 }, widthPlatform = { min: 100, max: 200 }, heightPlatform = { min: 100, max: 200 };
 
   // first platform object
-  newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
+  newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max }, themeIndex: themeIndex });
 
   // coin objects for coin counter and replay button
-  decorativeCoins = [new Coin({ x: { min: 20, max: 20 }, y: { min: 25, max: 25 }, context: context }), new Coin({ x: { min: 440, max: 440 }, y: { min: 175, max: 175 }, context: coinContext })];
+  decorativeCoin = new Coin({ x: { min: 20, max: 20 }, y: { min: 25, max: 25 } });
 
   // set score and colliding platform number counter to 0
-  score = 0;
-  platformNum = 0;
+  player.score = 0;
+  player.platformNum = 0;
 
   // adds platform to a list that contains all platforms objects
   platforms = []; platforms.push(newPlatform);
@@ -445,9 +478,10 @@ function initGame() {
   player.velocity.x = 0; player.velocity.y = 0; player.cow = 350; player.prevPosition = 350; player.cowImage = imageObjects[0];
 
   // sets HTML game elements to visible and hides all other elements
-  elementVisibility(gameElements, "visible");
   elementVisibility(gameOverElements, "hidden");
   elementVisibility(menuElements, "hidden");
+
+  elementVisibility(gameElements, "visible");
 
   // start the first frame request
   window.requestAnimationFrame(gameLoop);
@@ -458,9 +492,6 @@ function gameLoop(timeStamp) {
   // calculates how manu seconds have passed since the last frame request in order to accurately calculate the location of the character using it's constant speed
   secondsPassed = Math.min((timeStamp - oldTimeStamp) / 1000, .5);
   oldTimeStamp = timeStamp;
-  
-  eventListener("keydown", true);
-  eventListener("keyup", false);
 
   if (music[musicIndex].ended) {
     music[musicIndex].pause();
@@ -472,7 +503,7 @@ function gameLoop(timeStamp) {
     music[musicIndex].play();
   }
   
-  player.update(secondsPassed);
+  player.update(secondsPassed, themeIndex, up, left, right, platforms, coins, musicMuted);
   
   // creates the next platform object after the furthest one visible on screen is 100 pixels away from the right edge
   if (newPlatform.position.x + newPlatform.dimension.x + player.width <= player.position.x + 800) {
@@ -481,7 +512,7 @@ function gameLoop(timeStamp) {
     xPlatform.min = newPlatform.position.x + newPlatform.dimension.x + 200;
     xPlatform.max = xPlatform.min + 100;
 
-    newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max } });
+    newPlatform = new Platform({ x: { min: xPlatform.min, max: xPlatform.max }, y: { min: yPlatform.min, max: yPlatform.max }, width: { min: widthPlatform.min, max: widthPlatform.max }, height: { min: heightPlatform.min, max: heightPlatform.max }, themeIndex: themeIndex });
 
     // adds the platform to the list containing all platform objects
     platforms.push(newPlatform);
@@ -493,7 +524,7 @@ function gameLoop(timeStamp) {
     xCoin = { min: platforms[coinIndex].position.x, max: platforms[coinIndex].position.x + platforms[coinIndex].dimension.x + 200 };
     yCoin = { min: platforms[coinIndex].position.y - 200, max: platforms[coinIndex].position.y - 120 };
 
-    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max }, context: context });
+    newCoin = new Coin({ x: { min: xCoin.min, max: xCoin.max }, y: { min: yCoin.min, max: yCoin.max } });
 
     // adds the point to the list containing all point objects
     coins.push(newCoin);
@@ -512,17 +543,31 @@ function gameLoop(timeStamp) {
   }  
 
   // updates annimation for coin counter
-  decorativeCoins[0].update(secondsPassed, 0);
+  decorativeCoin.update(secondsPassed, 0);
 
-  document.getElementById("coins").innerHTML = "X " + coinsCollected.toString();
-  document.getElementById("score").innerHTML = "score: " + score.toString();
+  document.getElementById("coins").innerHTML = "X " + player.coinsCollected.toString();
+  document.getElementById("score").innerHTML = "score: " + player.score.toString();
 
   if (player.position.y > 500) { // if the player falls into the void the game restarts
-    window.requestAnimationFrame(gameOver);
-  } else { // otherwise new frames countinue being requested by recalling the gameLoop function
-    window.requestAnimationFrame(gameLoop);
+
+    document.getElementById("menu").addEventListener("click", function() { returnToMenu = true; });
+    
+    if (returnToMenu == true) {
+      menuScreen();
+    } else {
+      document.getElementById("backgroundtint").style.visibility="visible";
+      elementVisibility(gameOverElements, "visible");
+      player.velocity.x = 0;
+      player.velocity.y = 0;
+    }
+  } else { 
+    eventListener("keydown", true);
+    eventListener("keyup", false);
   }
 
+  // new frames keep being requested by recalling the gameLoop function
+  window.requestAnimationFrame(gameLoop);
+  
 }
 
 // listens for keydown/keyup events for keys "a", "d" and "w"
@@ -611,6 +656,6 @@ function colourRandom() {
 
 function saveData() {
 
-  localStorage.setItem("coins", coinsCollected.toString());
+  localStorage.setItem("coins", player.coinsCollected.toString());
   
 }

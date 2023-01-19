@@ -14,6 +14,7 @@ canvas {
 button {
   position: absolute;
   padding: 15px 32px;
+  visibility: hidden;
   
   border: none;
   background-repeat: no-repeat;
@@ -26,6 +27,28 @@ button {
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   color: white;
   font-size: 50px;
+}
+
+input {
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: black;
+  font-size: 50px;
+}
+
+#submit {
+  background-color: purple;
+  visibility: visible;
+}
+
+#error {
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: black;
+  font-size: 50px;
+
+  position: absolute;
+  
+  left: 900px;
+  top: 10px;
 }
 
 #backgroundtint {
@@ -41,10 +64,10 @@ button {
 #title {
   position: absolute;
   
-  width: 500px;
-  height: 175px;
+  width: 250px;
+  height: 87.5px;
   
-  left: 130px;
+  left: 375px;
   top: 100px;
 }
 
@@ -61,7 +84,6 @@ button {
 
 #menu {
   background-image: url("game over/1.png");
-  visibility: hidden;
   
   left: 295px;
   top: 265px;
@@ -69,7 +91,6 @@ button {
 
 #replay {
   background-image: url("game over/2.png");
-  visibility: hidden;
   
   left: 505px;
   top: 265px;
