@@ -1,7 +1,12 @@
 html, body {
   height: 100%;
   width: 100%;
-  overflow:hidden;
+  overflow: hidden;
+  position: absolute;
+
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: white;
+  font-size: 20px;
 }
 
 canvas {
@@ -9,6 +14,7 @@ canvas {
   background-color: transparent;
   position: absolute;
   left: 100px;
+  z-index: -1;
 }
 
 button {
@@ -29,26 +35,98 @@ button {
   font-size: 50px;
 }
 
-input {
-  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  color: black;
-  font-size: 50px;
+#logIn {
+  visibility: visible;
+
+  background-image: url("menu/11.2.png");
+  
+  left: 175px;
+  top: 193.75px;
 }
 
-#submit {
-  background-color: purple;
+#logIn:hover {
+  background-image: url("menu/11.2.png");
+}
+
+#newPlayer {
   visibility: visible;
+
+  background-image: url("menu/10.1.png");
+  
+  left: 175px;
+  top: 293.75px;
+}
+
+#newPlayer:hover {
+  background-image: url("menu/10.2.png");
+}
+
+#username {
+  position: absolute;
+
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: black;
+  font-size: 25px;
+
+  width: 200px;
+  
+  left: 625px;
+  top: 193.75px;
+}
+
+#password {
+  position: absolute;
+
+  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: black;
+  font-size: 25px;
+  
+  width: 200px;
+  
+  left: 625px;
+  top: 243.75px;
+}
+
+#usernameLabel {
+  position: absolute;
+
+  width: 200px;
+  height: 100px;
+  
+  left: 425px;
+  top: 160px;
+}
+
+#passwordLabel {
+  position: absolute;
+
+  width: 200px;
+  height: 100px;
+  
+  left: 425px;
+  top: 210px;
+}
+
+#enter {
+  visibility: visible;
+
+  background-image: url("menu/8.png");
+
+  width: 150px;
+  height: 75px;
+  
+  left: 425px;
+  top: 318px;
 }
 
 #error {
-  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  color: black;
-  font-size: 50px;
-
+  color: tomato;
   position: absolute;
+  width: 200px;
+  height: 100px;
   
-  left: 900px;
-  top: 10px;
+  left: 620px;
+  top: 319px;
 }
 
 #backgroundtint {
@@ -58,7 +136,8 @@ input {
   height: 500px;
   
   left: 100px;
-  top: 10px;
+  top: 0px;
+  z-index: -1;
 }
 
 #title {
@@ -68,7 +147,7 @@ input {
   height: 87.5px;
   
   left: 375px;
-  top: 100px;
+  top: 81px;
 }
 
 #revive {
@@ -76,7 +155,6 @@ input {
   
   width: 320px;
   height: 100px;
-  visibility: hidden;
   
   left: 340px;
   top: 155px;
@@ -162,34 +240,37 @@ input {
   height: 50px;
   
   left: 820px;
-  top: 440px;
+  top: 420px;
 }
 
 #coins {
+  position: absolute;
   color: white;
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 30px;
-  position: absolute;
+
   left: 160px;
   top: 0px;
   visibility: hidden;
 }
 
 #score {
+  position: absolute;
   color: white;
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 30px;
-  position: absolute;
+  
   left: 120px;
   top: 40px;
   visibility: hidden;
 }
 
 #controls {
+  position: absolute;
   color: white;
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 20px;
-  position: absolute;
+
   left: 120px;
   top: 375px;
   visibility: hidden;
