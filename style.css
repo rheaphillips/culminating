@@ -5,7 +5,7 @@ html, body {
   position: absolute;
 
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  color: white;
+  color: #913822;
   font-size: 20px;
 }
 
@@ -13,35 +13,81 @@ canvas {
   border-radius: 10px;
   background-color: transparent;
   position: absolute;
-  left: 100px;
-  z-index: -1;
 }
 
 button {
   position: absolute;
-  padding: 15px 32px;
+  padding: 22.5px 48px;
   visibility: hidden;
   
   border: none;
   background-repeat: no-repeat;
   background-color: transparent;
   background-size: contain;
-
-  width: 200px;
-  height: 100px;
   
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   color: white;
-  font-size: 50px;
+  font-size: 75px;
+  cursor: pointer;
+}
+
+.smallText {
+  width: 300px;
+  height: 150px;
+  
+}
+
+.longText {
+  width: 480px;
+  height: 125px;
+}
+
+table {
+  border-collapse: collapse;
+  visibility: hidden;
+
+  position: absolute;
+  
+  width: 600px;
+
+  left: 300px;
+  top: 225px;
+}
+
+td, th {
+  border: 2px solid #913822;
+  /* color: #913822; */
+  text-align: left;
+  padding: 5px;
+}
+
+th {
+  background-color: plum;
+}
+
+tr:hover {
+  background-color: plum;
+}
+
+#subMenuBackground {
+  image-rendering: auto;
+  
+  visibility: hidden;
+  position: absolute;
+  
+  width: 1098.9px;
+  height: 653.4px;
+  
+  left: 50.55px;
+  top: 48.3px;
+
 }
 
 #logIn {
-  visibility: visible;
-
   background-image: url("menu/11.2.png");
   
-  left: 175px;
-  top: 193.75px;
+  left: 112.5px;
+  top: 290.625px;
 }
 
 #logIn:hover {
@@ -49,12 +95,10 @@ button {
 }
 
 #newPlayer {
-  visibility: visible;
-
   background-image: url("menu/10.1.png");
   
-  left: 175px;
-  top: 293.75px;
+  left: 112.5px;
+  top: 440.625px;
 }
 
 #newPlayer:hover {
@@ -66,12 +110,12 @@ button {
 
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   color: black;
-  font-size: 25px;
+  font-size: 37.5px;
 
-  width: 200px;
+  width: 300px;
   
-  left: 625px;
-  top: 193.75px;
+  left: 787.5px;
+  top: 290.625px;
 }
 
 #password {
@@ -79,203 +123,530 @@ button {
 
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   color: black;
-  font-size: 25px;
+  font-size: 37.5px;
   
-  width: 200px;
+  width: 300px;
   
-  left: 625px;
-  top: 243.75px;
+  left: 787.5px;
+  top: 365.625px;
 }
 
 #usernameLabel {
   position: absolute;
-
-  width: 200px;
-  height: 100px;
   
-  left: 425px;
-  top: 160px;
+  left: 487.5px;
+  top: 240px;
 }
 
 #passwordLabel {
   position: absolute;
-
-  width: 200px;
-  height: 100px;
   
-  left: 425px;
-  top: 210px;
+  left: 487.5px;
+  top: 315px;
 }
 
 #enter {
-  visibility: visible;
-
   background-image: url("menu/8.png");
 
-  width: 150px;
-  height: 75px;
+  width: 225px;
+  height: 112.5px;
   
-  left: 425px;
-  top: 318px;
+  left: 487.5px;
+  top: 477px;
 }
 
 #error {
   color: tomato;
   position: absolute;
-  width: 200px;
-  height: 100px;
+  font-size: 30px;
   
-  left: 620px;
-  top: 319px;
+  left: 780px;
+  top: 478.5px;
 }
 
 #backgroundtint {
   position: absolute;
-  
-  width: 800px;
-  height: 500px;
-  
-  left: 100px;
   top: 0px;
-  z-index: -1;
+  width: 1200px;
+  height: 750px;
 }
 
 #title {
   position: absolute;
   
-  width: 250px;
-  height: 87.5px;
+  width: 375px;
+  height: 131.25px;
   
-  left: 375px;
-  top: 81px;
+  left: 412.5px;
+  top: 121.5px;
+}
+
+#pause {
+  position: absolute;
+  
+  left: 900px;
+  top: 45px;
 }
 
 #revive {
   background-image: url("game over/3.png");
   
-  width: 320px;
-  height: 100px;
-  
-  left: 340px;
-  top: 155px;
+  left: 360px;
+  top: 232.5px;
+}
+
+#resume {
+  left: 360px;
+  top: 232.5px;
 }
 
 #menu {
   background-image: url("game over/1.png");
   
-  left: 295px;
-  top: 265px;
+  left: 292.5px;
+  top: 397.5px;
 }
 
 #replay {
   background-image: url("game over/2.png");
   
-  left: 505px;
-  top: 265px;
+  left: 607.5px;
+  top: 397.5px;
 }
 
 #gameOverCoin {
-  left: 440px;
-  top: 175px;
+  left: 510px;
+  top: 262.5px;
 }
 
 #play {
   background-image: url("menu/2.png");
   
-  left: 130px;
-  top: 320px;
+  left: 45px;
+  top: 480px;
 }
 
 #leaderboard {
-  background-image: url("menu/6.png");
-
-  width: 320px;
-  height: 100px;
+  background-image: url("menu/6.1.png");
   
-  left: 340px;
-  top: 320px;
+  left: 360px;
+  top: 480px;
 }
 
-#shop {
-  background-image: url("menu/3.png");
+#leaderboardTitle {
+  visibility: hidden;
+  position: absolute;
   
-  left: 670px;
+  left: 360px;
   top: 100px;
 }
 
 #help {
-  background-image: url("menu/4.png");
+  background-image: url("menu/4.1.png");
   
-  left: 670px;
-  top: 210px;
+  left: 855px;
+  top: 315px;
+}
+
+#helpTitle {
+  visibility: hidden;
+  position: absolute;
+  
+  left: 450px;
+  top: 100px;
+}
+
+#objectiveTitle {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 400px;
+  height: 100px;
+  
+  left: 400px;
+  top: 225px;
+}
+
+#objective {
+  font-size: 30px;
+
+  visibility: hidden;
+  position: absolute;
+
+  text-align: center;
+
+  width: 750px;
+  
+  left: 225px;
+  top: 325px;
+}
+
+#controlsTitle {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 400px;
+  height: 100px;
+  
+  left: 400px;
+  top: 425px;
+  
+}
+
+#WASD {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 150px;
+  height: 100px;
+  
+  left: 625px;
+  top: 525px;
+}
+
+#controls {
+  font-size: 30px;
+
+  visibility: hidden;
+  position: absolute;
+
+  width: 200px;
+  
+  left: 425px;
+  top: 525px;
 }
 
 #settings {
-  background-image: url("menu/5.png");
+  background-image: url("menu/5.1.png");
   
+  left: 855px;
+  top: 480px;
+}
+
+#settingsTitle {
+  visibility: hidden;
+  position: absolute;
+  
+  left: 450px;
+  top: 100px;
+}
+
+#soundEffectsTitle {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 400px;
+  height: 100px;
+  
+  left: 297.5px;
+  top: 225px;
+}
+
+#soundEffects {
+  visibility: hidden;
+  position: absolute;
+
+  width: 160 px;
+  
+  font-size: 45px;
+  text-align: center;
+  
+  left: 790px;
+  top: 200px;
+}
+
+#soundEffectsMinus {
+  background-image: url("menu/5.8.png");
+  
+  width: 30px;
+  height: 30px;
+  
+  left: 730px;
+  top: 250px;
+}
+
+#soundEffectsPlus {
+  background-image: url("menu/5.7.png");
+
+  width: 30px;
+  height: 30px;
+  
+  left: 890px;
+  top: 250px;
+  
+}
+
+#musicTitle {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 400px;
+  height: 100px;
+  
+  left: 297.5px;
+  top: 325px;
+}
+
+#music {
+  visibility: hidden;
+  position: absolute;
+
+  width: 160 px;
+  
+  font-size: 45px;
+  text-align: center;
+
+  left: 790px;
+  top: 300px;
+}
+
+#musicMinus {
+  background-image: url("menu/5.8.png");
+  
+  width: 30px;
+  height: 30px;
+  
+  left: 730px;
+  top: 350px;
+}
+
+#musicPlus {
+  background-image: url("menu/5.7.png");
+  
+  width: 30px;
+  height: 30px;
+  
+  left: 890px;
+  top: 350px;  
+}
+
+#difficulty {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 400px;
+  height: 100px;
+  
+  left: 297.5px;
+  top: 425px;
+}
+
+/* The container */
+.difficultyCheckbox {
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+
+  font-size: 30px;
+  visibility: hidden;
+  
+}
+
+/* Hide the browser's default radio button */
+.difficultyCheckbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  
+}
+
+/* Create a custom radio button */
+.difficultyCheckmark {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+  border-radius: 50%;
+  
+}
+
+/* On mouse-over, add a grey background color */
+.difficultyCheckmark:hover {
+  background-color: #ccc;
+}
+
+/* When the radio button is checked, add a blue background */
+.difficultyCheckbox input:checked ~ .difficultyCheckmark {
+  background-color: #913822;
+}
+
+#easy {
+  position: absolute;
+  left: 620px;
+  top: 455px;
+  height: 25px;
+  width: 25px;
+}
+
+#medium {
+  position: absolute;
+  left: 740px;
+  top: 455px;
+  height: 25px;
+  width: 25px;
+}
+
+#hard {
+  position: absolute;
+  left: 890px;
+  top: 455px;
+  height: 25px;
+  width: 25px;
+}
+
+#theme {
+  visibility: hidden;
+  position: absolute;
+  
+  width: 400px;
+  height: 100px;
+  
+  left: 297.5px;
+  top: 525px;
+}
+
+/* The container */
+.themeCheckbox {
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+
+  visibility: hidden;
+  
+}
+
+/* Hide the browser's default radio button */
+.themeCheckbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  
+}
+
+/* Create a custom radio button */
+.themeCheckmark {
+  width: 100px;
+  height: 100px;
+}
+
+/* On mouse-over, add a grey background color */
+.themeCheckmark:hover {
+  border: 5px solid #913822;
+}
+
+/* When the radio button is checked, add a blue background */
+.themeCheckbox input:checked ~ .themeCheckmark {
+  border: 5px solid #913822;
+}
+
+#night {
+  position: absolute;
+  left: 550px;
+  top: 525px;
+}
+
+#evening {
+  position: absolute;
   left: 670px;
-  top: 320px;
+  top: 525px;
+}
+
+#morning {
+  position: absolute;
+  left: 790px;
+  top: 525px;
+}
+
+#back {
+  background-image: url("menu/3.png");
+  
+  width: 20px;
+  height: 20px;
+  
+  left: 890px;
+  top: 120px;
 }
 
 #exit {
   background-image: url("menu/7.png");
   
-  width: 25px;
-  height: 25px;
+  width: 37.5px;
+  height: 37.5px;
   
-  left: 845px;
-  top: 30px;
+  left: 1117.5px;
+  top: 45px;
 }
 
-#changeTheme {
-  left: 100px;
-  top: 520px;
+#exitBackground {
+  image-rendering: auto;
+  
+  visibility: hidden;
+  position: absolute;
+  
+  width: 801.9px;
+  height: 455.4px;
+  
+  left: 199.05px;
+  top: 147.3px;
+
 }
 
-#music {
+#exitingMenu {
+  font-size: 52.5px;
+
+  visibility: hidden;
+  position: absolute;
+
+  text-align: center;
+
+  left: 450px;
+  top: 262.5px;
+
+}
+
+#yes {
+  background-image: url("menu/15.png");
+
+  width: 112.5px;
+  height: 90px;
+  
+  left: 468.75px;
+  top: 397.5px;
+
+}
+
+#no {
+  background-image: url("menu/14.png");
+  
+  width: 112.5px;
+  height: 90px;
+  
+  left: 618.75px;
+  top: 397.5px;
+
+}
+
+#musicSwitch {
   background-image: url("game/2.png");
   visibility: hidden;
   
-  width: 50px;
-  height: 50px;
+  width: 75px;
+  height: 75px;
   
-  left: 820px;
-  top: 420px;
+  left: 1080px;
+  top: 630px;
 }
 
-#coins {
+#stats {
   position: absolute;
   color: white;
-  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  font-size: 30px;
+  font-size: 45px;
 
-  left: 160px;
   top: 0px;
+  left: 110px;
   visibility: hidden;
-}
-
-#score {
-  position: absolute;
-  color: white;
-  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  font-size: 30px;
-  
-  left: 120px;
-  top: 40px;
-  visibility: hidden;
-}
-
-#controls {
-  position: absolute;
-  color: white;
-  font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  font-size: 20px;
-
-  left: 120px;
-  top: 375px;
-  visibility: hidden;
-}
-
-#changeTheme:hover{
-  background-color: plum;
 }
