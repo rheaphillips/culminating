@@ -1,3 +1,8 @@
+/* Name: Rhea Phillips
+Data: January 20th, 2023
+Program Name: Moo!
+Program Purpose: A 2D Parkour GUI based game where you're a cow exploring the vast world! The objective of the game is to beat your personal highscore; traveling as far as possible by jumping from one platform to another, without falling. */
+
 // ------------ VARIABLES ------------
 
 // declares global variables
@@ -782,7 +787,8 @@ function menuScreen() {
 
   // music starts playing as sson as user enters the menu page
   music[musicIndex].play();
-  musicMuted = false
+  document.getElementById("musicSwitch").style.backgroundImage = musicUnmutedButtons[themeIndex];
+  musicMuted = false;
 
   // ensures all elements are hidden besides menu elements since a player could be entering the menu from any other page
   elementVisibility(gameElements, "hidden");
