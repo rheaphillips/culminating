@@ -1,3 +1,7 @@
+:root {
+  --themeColour: #913822;
+}
+
 html, body {
   height: 100%;
   width: 100%;
@@ -5,7 +9,7 @@ html, body {
   position: absolute;
 
   font-family: Arial Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  color: #913822;
+  color: var(--themeColour);
   font-size: 20px;
 }
 
@@ -42,6 +46,9 @@ button {
   height: 125px;
 }
 
+
+/* formating for the leaderboard table*/
+
 table {
   border-collapse: collapse;
   visibility: hidden;
@@ -55,14 +62,13 @@ table {
 }
 
 td, th {
-  border: 2px solid #913822;
-  /* color: #913822; */
+  border: 2px solid var(--themeColour);
   text-align: left;
   padding: 5px;
 }
 
 th {
-  background-color: plum;
+  background-color: white;
 }
 
 tr:hover {
@@ -80,7 +86,6 @@ tr:hover {
   
   left: 50.55px;
   top: 48.3px;
-
 }
 
 #logIn {
@@ -181,11 +186,30 @@ tr:hover {
   top: 121.5px;
 }
 
-#pause {
+#welcome {
+  font-size: 52.5px;
+  color: white;
+
+  visibility: hidden;
   position: absolute;
+
+  text-align: center;
+  width: 300px;
+
+  left: 855px;
+  top: 115px;
+
+}
+
+#pause {
+  background-image: url("game/pauseWhite.png");
+  visibility: hidden;
   
-  left: 900px;
-  top: 45px;
+  width: 50px;
+  height: 50px;
+  
+  left: 1100px;
+  top: 50px;
 }
 
 #revive {
@@ -196,6 +220,8 @@ tr:hover {
 }
 
 #resume {
+  background-image: url("game over/4.png");
+  
   left: 360px;
   top: 232.5px;
 }
@@ -356,7 +382,7 @@ tr:hover {
 }
 
 #soundEffectsMinus {
-  background-image: url("menu/5.8.png");
+  background-image: url("menu/5.8.0.png");
   
   width: 30px;
   height: 30px;
@@ -366,7 +392,7 @@ tr:hover {
 }
 
 #soundEffectsPlus {
-  background-image: url("menu/5.7.png");
+  background-image: url("menu/5.7.0.png");
 
   width: 30px;
   height: 30px;
@@ -401,7 +427,7 @@ tr:hover {
 }
 
 #musicMinus {
-  background-image: url("menu/5.8.png");
+  background-image: url("menu/5.8.0.png");
   
   width: 30px;
   height: 30px;
@@ -411,7 +437,7 @@ tr:hover {
 }
 
 #musicPlus {
-  background-image: url("menu/5.7.png");
+  background-image: url("menu/5.7.0.png");
   
   width: 30px;
   height: 30px;
@@ -470,7 +496,7 @@ tr:hover {
 
 /* When the radio button is checked, add a blue background */
 .difficultyCheckbox input:checked ~ .difficultyCheckmark {
-  background-color: #913822;
+  background-color: var(--themeColour);
 }
 
 #easy {
@@ -535,12 +561,12 @@ tr:hover {
 
 /* On mouse-over, add a grey background color */
 .themeCheckmark:hover {
-  border: 5px solid #913822;
+  border: 5px solid var(--themeColour);
 }
 
 /* When the radio button is checked, add a blue background */
 .themeCheckbox input:checked ~ .themeCheckmark {
-  border: 5px solid #913822;
+  border: 5px solid var(--themeColour);
 }
 
 #night {
@@ -562,7 +588,7 @@ tr:hover {
 }
 
 #back {
-  background-image: url("menu/3.png");
+  background-image: url("menu/3.0.png");
   
   width: 20px;
   height: 20px;
@@ -602,6 +628,7 @@ tr:hover {
   position: absolute;
 
   text-align: center;
+  width: 300px;
 
   left: 450px;
   top: 262.5px;
@@ -609,7 +636,7 @@ tr:hover {
 }
 
 #yes {
-  background-image: url("menu/15.png");
+  background-image: url("menu/15.0.png");
 
   width: 112.5px;
   height: 90px;
@@ -620,7 +647,7 @@ tr:hover {
 }
 
 #no {
-  background-image: url("menu/14.png");
+  background-image: url("menu/14.0.png");
   
   width: 112.5px;
   height: 90px;
@@ -631,7 +658,7 @@ tr:hover {
 }
 
 #musicSwitch {
-  background-image: url("game/2.png");
+  background-image: url("game/mutedWhite.png");
   visibility: hidden;
   
   width: 75px;

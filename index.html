@@ -9,11 +9,10 @@
 </head>
 
 <body>
-  
+
+  <!-- HTML canvas -->
   <canvas id="display" width="1200" height="750"></canvas>
   <p id="canvasNotSupported"></p>
-
-  <p id="stats"></p>
   
   <img id="backgroundtint" src="menu/backgroundtint.png" alt="backgroundtint">  
   
@@ -26,32 +25,36 @@
   <input type="text" id="username" maxlength = "20" value="">
   <input type="text" id="password" maxlength = "20" value="">
   <div id="error" class="smallText"></div>
-  
+
+  <!-- title -->
   <img id="title" src="menu/1.png" alt="MOO!">
 
   <!-- buttons within the menu screen -->
   <button id="play" type="button" class="smallText" onclick="initGame();"></button>
   <button id="leaderboard" type="button" class="longText" onclick="leaderboard();"></button>
+  <div id="welcome"></div>
   <button id="help" type="button" class="smallText" onclick="help();"></button>
   <button id="settings" type="button" class="smallText" onclick="settings();"></button>
   <button id="exit" type="button" onclick="exit();"></button>
-  <img id="subMenuBackground" src="menu/bigBrickBackground.png" alt="">
+  <img id="subMenuBackground" src="menu/bigBrickBackground.0.png" alt="">
   <button id="back" type="button" onclick="menuScreen();"></button>
 
   <!-- elements within the exit menu screen -->
-  <img id="exitBackground" src="menu/smallBrickBackground.png" alt="">
+  <img id="exitBackground" src="menu/smallBrickBackground.0.png" alt="">
   <div id="exitingMenu">Do you want to sign out?</div>
   <button id="yes" type="button" onclick="loginScreen();"></button>
   <button id="no" type="button" onclick="menuScreen();"></button>
+
+  <!-- elements within the actual game -->
+  <button id="pause" type="button"></button>
+  <p id="stats"></p>
+  <button id="musicSwitch" type="button" onclick="playMusic()"></button>
   
   <!-- buttons within the pause/game over menus -->
-  <button id="pause" type="button" class="smallText" >pause</button>
   <button id="revive" type="button" class="longText" onclick="revive();"></button>
-  <button id="resume" type="button" class="longText" >resume</button>
+  <button id="resume" type="button" class="longText" ></button>
   <button id="replay" type="button" class="smallText" ></button>
   <button id="menu" type="button" class="smallText" ></button>
-  
-  <button id="musicSwitch" type="button" onclick="playMusic()"></button>
 
   <!-- music/sound effects -->
   <audio id="song1" src="music/song1.mp3"></audio>
@@ -60,7 +63,7 @@
   <audio id="coinSound" src="music/coin.mp3"></audio>
 
   <!-- leaderboard page elements -->
-  <img id="leaderboardTitle" class="longText" src="menu/6.2.png" alt="">
+  <img id="leaderboardTitle" class="longText" src="menu/6.2.0.png" alt="">
   <table id="leaderboardTable"> 
     <tr id="headings">
       <th>Ranking</th>
@@ -70,53 +73,57 @@
   </table>
 
   <!-- help page elements -->
-  <img id="helpTitle" class="smallText" src="menu/4.2.png" alt="">
-  <img id="objectiveTitle" src="menu/4.3.png" alt="">
+  <img id="helpTitle" class="smallText" src="menu/4.2.0.png" alt="">
+  <img id="objectiveTitle" src="menu/4.3.0.png" alt="">
   <div id="objective">You are a simple cow exploring the vast world! Try to travel as far as possible by jumping from one platform to another! But be careful- if you fall into the void you die!</div>
-  <img id="controlsTitle" src="menu/4.4.png" alt="">
-  <img id="WASD" src="menu/4.5.png" alt="">
+  <img id="controlsTitle" src="menu/4.4.0.png" alt="">
+  <img id="WASD" src="menu/4.5.0.png" alt="">
   <div id="controls">w = jump<br>a = left<br>d = right</div>
 
   <!-- settings page elements -->
-  <img id="settingsTitle" class="smallText" src="menu/5.2.png" alt="">
+  <img id="settingsTitle" class="smallText" src="menu/5.2.0.png" alt="">
   
-  <img id="soundEffectsTitle" src="menu/5.3.png" alt="">
+  <img id="soundEffectsTitle" src="menu/5.3.0.png" alt="">
   <p id="soundEffects"></p>
   <button id="soundEffectsPlus" type="button" ></button>
   <button id="soundEffectsMinus" type="button" ></button>
   
-  <img id="musicTitle" src="menu/5.4.png" alt="">
+  <img id="musicTitle" src="menu/5.4.0.png" alt="">
   <p id="music"></p>
   <button id="musicPlus" type="button" ></button>
   <button id="musicMinus" type="button" ></button>
   
-  <img id="difficulty" class="longText" src="menu/5.5.png" alt="">
+  <img id="difficulty" class="longText" src="menu/5.5.0.png" alt="">
 
+  <!-- checkboxs for difficulty level -->
+  
   <label class="difficultyCheckbox" id="easy" >easy
-    <input type="radio" name="difficulty" id="difficulty1" value="1" onclick="updateDifficulty();">
+    <input type="radio" name="difficulty" id="difficulty1" value="1" onclick="updateDifficultyIndex();">
     <span class="difficultyCheckmark"></span>
   </label>
   <label class="difficultyCheckbox" id="medium" >medium
-    <input type="radio" name="difficulty" id="difficulty2" value="2" onclick="updateDifficulty();">
+    <input type="radio" name="difficulty" id="difficulty2" value="2" onclick="updateDifficultyIndex();">
     <span class="difficultyCheckmark"></span>
   </label>
   <label class="difficultyCheckbox" id="hard" >hard
-    <input type="radio" name="difficulty" id="difficulty3" value="3" onclick="updateDifficulty();">
+    <input type="radio" name="difficulty" id="difficulty3" value="3" onclick="updateDifficultyIndex();">
     <span class="difficultyCheckmark"></span>
   </label>
   
-  <img id="theme" class="longText" src="menu/5.6.png" alt="">
+  <img id="theme" class="longText" src="menu/5.6.0.png" alt="">
 
+  <!-- checkboxs for theme choice -->
+  
   <label class="themeCheckbox" id="night" >
-    <input type="radio" name="theme" id="theme1" value="1" onclick="updateTheme();">
+    <input type="radio" name="theme" id="theme0" value="1" onclick="updateThemeIndex();">
     <img class="themeCheckmark" src="menu/sky1.png" />
   </label>
   <label class="themeCheckbox" id="evening" >
-    <input type="radio" name="theme" id="theme2" value="2" onclick="updateTheme();">
+    <input type="radio" name="theme" id="theme1" value="2" onclick="updateThemeIndex();">
     <img class="themeCheckmark" src="menu/sky2.png" />
   </label>
   <label class="themeCheckbox" id="morning" >
-    <input type="radio" name="theme" id="theme3" value="3" onclick="updateTheme();">
+    <input type="radio" name="theme" id="theme2" value="3" onclick="updateThemeIndex();">
     <img class="themeCheckmark" src="menu/sky3.png" />
   </label>
   
